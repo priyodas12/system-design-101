@@ -1,0 +1,114 @@
+# Secrets: each database's .env holds credentials and is never committed.
+.env
+.env.*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/
+.vscode-test/
+*.code-workspace
+.history/
+*.vsix
+
+# JetBrains (IntelliJ IDEA, PyCharm, DataGrip, WebStorm, Rider, GoLand, Fleet, ...)
+.idea/
+.idea_modules/
+.fleet/
+*.iml
+*.ipr
+*.iws
+out/
+cmake-build-*/
+# JetBrains HTTP Client private environments hold tokens and passwords
+http-client.private.env.json
+# JetBrains plugins
+atlassian-ide-plugin.xml
+com_crashlytics_export_strings.xml
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Other editors
+*.swp
+*.swo
+*~
+
+# Java (Maven, Gradle)
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+target/
+.gradle/
+build/
+# Keep the build-tool wrappers, which are meant to be committed
+!gradle/wrapper/gradle-wrapper.jar
+!.mvn/wrapper/maven-wrapper.jar
+# Eclipse / VS Code Java metadata
+.classpath
+.project
+.settings/
+.factorypath
+bin/
+
+# JavaScript / TypeScript (npm, yarn, pnpm)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.npm/
+.yarn/cache/
+.yarn/install-state.gz
+.pnp.*
+dist/
+coverage/
+.nyc_output/
+.next/
+.nuxt/
+.svelte-kit/
+.cache/
+.parcel-cache/
+.turbo/
+.eslintcache
+*.tsbuildinfo
+
+# Rust (Cargo). Cargo.lock stays committed.
+# target/ is covered in the Java section.
+**/*.rs.bk
+*.pdb
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.eggs/
+wheels/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
+.ipynb_checkpoints/
+pip-log.txt
+
+# Logs
+*.log

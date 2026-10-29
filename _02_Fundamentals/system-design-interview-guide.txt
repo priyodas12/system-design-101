@@ -1,0 +1,634 @@
+================================================================================
+                 SYSTEM DESIGN - INTERVIEW PREPARATION GUIDE
+================================================================================
+
+CONTENTS
+  1.  How to Approach a System Design Interview (45-60 min framework)
+  2.  Estimation Cheat Sheet (numbers to memorize)
+  3.  Core Concepts + Likely Interview Questions
+      3.1  Scalability
+      3.2  Load Balancing
+      3.3  Caching
+      3.4  Databases (SQL vs NoSQL, Indexing, Replication, Sharding)
+      3.5  CAP Theorem and Consistency
+      3.6  Communication (Sync vs Async, Queues, Pub/Sub)
+      3.7  API Design
+      3.8  Reliability and Fault Tolerance
+      3.9  Distributed Transactions
+      3.10 Observability
+      3.11 Security
+  4.  Common Trade-offs (say these out loud in the interview)
+  5.  Classic Design Problems - Short Blueprints
+  6.  Red Flags to Avoid
+  7.  Final Checklist Before You Say "Done"
+
+
+================================================================================
+1. HOW TO APPROACH A SYSTEM DESIGN INTERVIEW
+================================================================================
+
+Interviewers judge your PROCESS more than the final diagram.
+Use this time split for a 45-minute round:
+
+  STEP                              TIME      WHAT TO DO
+  --------------------------------  --------  ----------------------------------
+  1. Clarify requirements           5 min     Ask questions. Do not design yet.
+  2. Estimate scale                 5 min     QPS, storage, bandwidth.
+  3. Define API + data model        5 min     Main endpoints and tables.
+  4. High-level design              10 min    Boxes and arrows, end to end.
+  5. Deep dive                      15 min    2-3 hardest parts in detail.
+  6. Bottlenecks + wrap up          5 min     Failures, scaling, trade-offs.
+
+STEP 1 - Questions to ask
+  - Who are the users? How many? (DAU = Daily Active Users)
+  - What are the top 3 features? What is out of scope?
+  - Read-heavy or write-heavy?
+  - Is strong consistency needed, or is slightly stale data OK?
+  - Latency target? (e.g. p99 < 200 ms. p99 = 99% of requests are faster
+    than this)
+  - Availability target? (e.g. 99.9%)
+  - Global or single region?
+
+STEP 2 - Functional vs Non-functional requirements
+  Functional     = what the system does ("user can upload a photo")
+  Non-functional = how well it does it (scale, speed, uptime, consistency)
+
+  Always write both lists on the whiteboard. Interviewers look for this.
+
+
+================================================================================
+2. ESTIMATION CHEAT SHEET
+================================================================================
+
+TIME
+  1 day   = 86,400 seconds  ~ 10^5 seconds (use this for quick math)
+  1 month ~ 2.5 * 10^6 seconds
+  1 year  ~ 3 * 10^7 seconds
+
+QUICK QPS (Queries Per Second) CONVERSIONS
+  1 million requests/day    ~ 12 QPS
+  10 million requests/day   ~ 120 QPS
+  100 million requests/day  ~ 1,200 QPS
+  1 billion requests/day    ~ 12,000 QPS
+  Peak QPS ~ 2x to 3x the average QPS
+
+DATA SIZES
+  1 KB = 10^3 bytes     (a short text record)
+  1 MB = 10^6 bytes     (a photo)
+  1 GB = 10^9 bytes
+  1 TB = 10^12 bytes
+  1 PB = 10^15 bytes
+
+LATENCY NUMBERS (approximate - know the ORDER, not exact values)
+  L1 CPU cache read ..................... 1 ns
+  Main memory (RAM) read ................ 100 ns
+  SSD (Solid State Drive) random read ... 100 us   (us = microsecond)
+  Round trip inside same data center .... 0.5 ms
+  HDD (Hard Disk Drive) seek ............ 10 ms
+  Round trip across continents .......... 150 ms
+
+  Key takeaway: memory is ~1000x faster than SSD; network across the world
+  is very slow. This is why caching and CDNs matter.
+
+AVAILABILITY ("the nines")
+  99%      -> ~3.65 days downtime/year
+  99.9%    -> ~8.76 hours downtime/year
+  99.99%   -> ~52.6 minutes downtime/year
+  99.999%  -> ~5.26 minutes downtime/year
+
+  Two components in series (both must work): multiply availabilities.
+    99.9% * 99.9% = 99.8%
+  Two components in parallel (either can work): 1 - (failure * failure)
+    1 - (0.001 * 0.001) = 99.9999%
+
+SAMPLE ESTIMATE (Twitter-like app)
+  - 200 million DAU, each reads 100 posts/day, writes 2 posts/day
+  - Reads:  200M * 100 / 10^5 = 200,000 read QPS
+  - Writes: 200M * 2 / 10^5   = 4,000 write QPS
+  - Read:write ratio = 50:1  -> read-heavy -> cache aggressively
+  - Storage: 400M posts/day * 300 bytes = 120 GB/day ~ 44 TB/year (text only)
+
+
+================================================================================
+3. CORE CONCEPTS + LIKELY INTERVIEW QUESTIONS
+================================================================================
+
+--------------------------------------------------------------------------------
+3.1 SCALABILITY
+--------------------------------------------------------------------------------
+Vertical scaling (scale up)    : bigger machine. Simple, but has a hard limit
+                                 and is a SPOF (Single Point of Failure).
+Horizontal scaling (scale out) : more machines. Near unlimited, but needs
+                                 stateless services and coordination.
+
+Stateless service: keeps no user data in local memory. Any server can handle
+any request. Session data goes to a shared store (e.g. Redis).
+
+Q: How do you make a service horizontally scalable?
+A: Make it stateless, move session/state to a shared store or database,
+   put a load balancer in front, and use auto-scaling based on CPU or
+   request count.
+
+Q: When is vertical scaling the right choice?
+A: Early stage, small load, or for a database that is hard to shard.
+   It is simpler and cheaper until you hit the hardware limit.
+
+--------------------------------------------------------------------------------
+3.2 LOAD BALANCING
+--------------------------------------------------------------------------------
+A load balancer (LB) spreads traffic across servers and removes unhealthy ones.
+
+  Algorithm           How it works                     Good for
+  ------------------  -------------------------------  ----------------------
+  Round robin         Each server in turn              Equal servers
+  Least connections   Server with fewest open conns    Long-lived requests
+  IP / key hash       Same client -> same server       Sticky sessions, caches
+  Weighted            Bigger servers get more traffic  Mixed hardware
+
+Layer 4 LB: works at network level (IP + port). Fast, cannot read URLs.
+Layer 7 LB: works at application level (HTTP). Can route by URL, header,
+            cookie. Slower but smarter.
+
+Consistent hashing: a hashing method where adding/removing a server moves
+only a small part of the keys (about 1/N) instead of almost all of them.
+Used in caches, sharded databases, and load balancers.
+
+Q: What happens if the load balancer itself fails?
+A: Run LBs in pairs (active-passive or active-active) with a floating IP or
+   DNS (Domain Name System) failover. Cloud LBs (AWS ALB, Azure Load
+   Balancer) are already redundant.
+
+Q: Explain consistent hashing.
+A: Put servers and keys on a hash ring. Each key goes to the next server
+   clockwise. When a server is added, only keys between it and the previous
+   server move. Use "virtual nodes" (each server at many ring points) to
+   spread load evenly.
+
+--------------------------------------------------------------------------------
+3.3 CACHING
+--------------------------------------------------------------------------------
+Cache = fast storage (usually memory) for frequently used data.
+
+  Pattern          How it works                          Risk
+  ---------------  ------------------------------------  ----------------------
+  Cache-aside      App reads cache; on miss, reads DB    Stale data until TTL
+                   and fills cache                       expires
+  Read-through     Cache itself loads from DB on miss    Same as above
+  Write-through    Write cache + DB together             Slower writes
+  Write-back       Write cache now, DB later             Data loss if cache dies
+  Write-around     Write DB only, cache fills on read    First read is slow
+
+TTL (Time To Live)       : how long an entry stays before expiry.
+LRU (Least Recently Used): evict the item not used for the longest time.
+LFU (Least Frequently Used): evict the item used the fewest times.
+CDN (Content Delivery Network): servers around the world that cache static
+                          files (images, video, JS) close to users.
+
+Cache-aside pseudocode:
+    function getUser(id):
+        user = cache.get("user:" + id)
+        if user is null:
+            user = db.query(id)
+            cache.set("user:" + id, user, ttl = 10 minutes)
+        return user
+
+    function updateUser(id, data):
+        db.update(id, data)
+        cache.delete("user:" + id)      // delete, do not update
+
+Q: Why delete the cache entry on update instead of updating it?
+A: Two concurrent updates can write the cache in the wrong order and leave
+   stale data. Deleting is safer; the next read loads fresh data.
+
+Q: What is a cache stampede (thundering herd) and how do you prevent it?
+A: A hot key expires and thousands of requests hit the DB at once.
+   Fixes: a lock so only one request rebuilds the entry, random jitter on
+   TTL, or refresh the key early in the background.
+
+Q: What is cache penetration?
+A: Repeated requests for keys that do not exist, so they always hit the DB.
+   Fixes: cache the "not found" result with a short TTL, or use a Bloom
+   filter (a compact structure that quickly says "definitely not present").
+
+Q: Where can you cache?
+A: Browser -> CDN -> API gateway -> application (local memory) ->
+   distributed cache (Redis) -> database buffer cache.
+
+--------------------------------------------------------------------------------
+3.4 DATABASES
+--------------------------------------------------------------------------------
+SQL vs NoSQL
+
+  Aspect        SQL (Relational)                 NoSQL
+  ------------  -------------------------------  -------------------------------
+  Schema        Fixed tables                     Flexible
+  Guarantees    ACID                             Often BASE
+  Scaling       Mostly vertical; sharding hard   Built for horizontal scale
+  Queries       Joins, complex queries           Simple lookups by key
+  Examples      PostgreSQL, MySQL                Cassandra, DynamoDB, MongoDB,
+                                                 Redis, Cosmos DB
+  Use for       Payments, orders, inventory      Feeds, sessions, logs, IoT
+
+ACID = Atomicity (all or nothing), Consistency (rules always hold),
+       Isolation (transactions do not see each other's half work),
+       Durability (committed data survives crashes).
+BASE = Basically Available, Soft state, Eventually consistent.
+
+NoSQL types:
+  Key-value  -> Redis, DynamoDB           (sessions, cache)
+  Document   -> MongoDB, Cosmos DB        (product catalog, user profiles)
+  Wide-column-> Cassandra, HBase          (time series, huge write volume)
+  Graph      -> Neo4j                     (social networks, recommendations)
+
+INDEXING
+  - An index makes reads fast (like a book index) but makes writes slower
+    and uses extra storage.
+  - B-tree index: good for range queries. Default in most SQL DBs.
+  - Hash index: good for exact match only.
+  - Composite index on (a, b) helps queries on "a" or "a and b", not "b" alone.
+
+REPLICATION
+  Leader-follower : writes go to leader, reads spread to followers.
+                    Risk: replication lag -> followers may return old data.
+  Multi-leader    : several nodes accept writes. Needs conflict resolution.
+  Leaderless      : any node accepts writes (Cassandra, DynamoDB).
+                    Uses quorum: W + R > N gives strong reads.
+                    (N = copies, W = nodes that must confirm a write,
+                     R = nodes read from)
+
+  Sync replication  : safe, slower writes.
+  Async replication : fast, may lose recent writes if leader dies.
+
+SHARDING (PARTITIONING)
+  Split data across machines by a shard key.
+
+  Strategy         How                          Problem
+  ---------------  ---------------------------  ------------------------------
+  Range-based      user_id 1-1M on shard A ...  Hot spots on new ranges
+  Hash-based       hash(user_id) % N            Resharding moves lots of data
+                                                (fix: consistent hashing)
+  Directory-based  Lookup table key -> shard    Lookup table is a SPOF
+
+  Problems sharding brings:
+  - Cross-shard joins and transactions are hard
+  - Hot shards (one celebrity user gets all traffic)
+  - Rebalancing when adding shards
+
+Q: How do you choose a shard key?
+A: High cardinality (many distinct values), even distribution, and matches
+   the most common query so most queries hit one shard. Example: user_id for
+   a chat app, not country.
+
+Q: Your DB is slow. What do you check, in order?
+A: 1) Slow queries + missing indexes  2) Add cache  3) Read replicas
+   4) Vertical scale  5) Shard  6) Split into separate DBs per service.
+   Go from cheapest to most complex.
+
+Q: SQL or NoSQL for this system?
+A: Ask: Do I need transactions/joins? -> SQL. Huge write scale, simple
+   access by key, flexible schema? -> NoSQL. Saying "it depends, because..."
+   with reasons is the right answer.
+
+--------------------------------------------------------------------------------
+3.5 CAP THEOREM AND CONSISTENCY
+--------------------------------------------------------------------------------
+CAP theorem: during a network Partition (P), a distributed system must choose
+  Consistency (C)  : every read gets the latest write, or an error
+  Availability (A) : every request gets a non-error response
+Partitions always happen in real networks, so the real choice is C or A.
+
+  Choice  Behavior during partition         Examples
+  ------  --------------------------------  ---------------------------------
+  CP      Reject requests, stay correct     Bank balance, inventory, ZooKeeper
+  AP      Answer, maybe with stale data     Likes count, social feed, DNS
+
+PACELC (extension of CAP): if Partition -> choose A or C; Else (normal
+  operation) -> choose Latency or Consistency. Shows that even without
+  failures, strong consistency costs latency.
+
+Consistency models (strongest to weakest):
+  Strong / linearizable : everyone sees the latest write immediately.
+  Read-your-writes      : you always see your own updates.
+  Monotonic reads       : you never see data go "back in time".
+  Eventual              : all copies agree eventually.
+
+Q: Explain CAP with an example.
+A: Two DB nodes lose connection. A user writes to node 1. Another user reads
+   from node 2. CP: node 2 refuses the read. AP: node 2 returns old data.
+   For a payment system I choose CP; for a "likes" counter I choose AP.
+
+Q: How do you give "read-your-writes" with read replicas?
+A: Route a user's reads to the leader for a few seconds after they write,
+   or track the write version and only read from replicas that caught up.
+
+--------------------------------------------------------------------------------
+3.6 COMMUNICATION (SYNC VS ASYNC)
+--------------------------------------------------------------------------------
+  Style    Examples                          Use when
+  -------  --------------------------------  -----------------------------------
+  Sync     REST, gRPC                        Caller needs the answer now
+  Async    Kafka, RabbitMQ, Azure Service    Decouple services, absorb spikes,
+           Bus, AWS SQS                      long-running background work
+
+REST = Representational State Transfer (HTTP + JSON, resource-based URLs).
+gRPC = Google Remote Procedure Call (binary, HTTP/2, fast, strongly typed).
+WebSocket = long-lived two-way connection (chat, live updates).
+SQS = Simple Queue Service (AWS).
+
+Queue vs Pub/Sub:
+  Queue   : each message is processed by ONE consumer (task distribution).
+  Pub/Sub : each message goes to ALL subscribers (event broadcast).
+  Kafka   : a log that supports both via consumer groups; keeps messages
+            for replay; ordering is per partition.
+
+Delivery guarantees:
+  At-most-once  : may lose messages, never duplicates.
+  At-least-once : never loses, may duplicate  <- most common
+  Exactly-once  : hard; usually "at-least-once + idempotent consumer".
+
+Idempotency: doing the same operation twice has the same effect as once.
+
+Idempotent consumer pseudocode:
+    function handle(message):
+        if processedStore.contains(message.id):
+            return                          // duplicate, skip
+        doWork(message)
+        processedStore.add(message.id)      // same transaction as doWork
+
+Q: Why use a message queue?
+A: Decoupling (producer does not wait for consumer), buffering traffic spikes,
+   retries, and scaling consumers independently.
+
+Q: How do you handle a message that always fails?
+A: Retry with backoff a fixed number of times, then move it to a DLQ
+   (Dead Letter Queue) for investigation, and alert.
+
+Q: How do you keep message ordering in Kafka?
+A: Use the same partition key (e.g. order_id) so related messages go to the
+   same partition, which is read by one consumer in order.
+
+--------------------------------------------------------------------------------
+3.7 API DESIGN
+--------------------------------------------------------------------------------
+  - Use clear resource URLs:  GET /users/{id}/orders
+  - Correct HTTP methods: GET (read), POST (create), PUT (replace),
+    PATCH (partial update), DELETE.
+  - GET, PUT, DELETE are idempotent. POST is not -> use an Idempotency-Key
+    header for payments and orders.
+  - Pagination: cursor-based ("give me items after id X") is better than
+    offset-based for large or changing data.
+  - Versioning: /v1/... or a header.
+  - API Gateway: single entry point that handles auth, rate limiting,
+    routing, logging (e.g. AWS API Gateway, Azure APIM = API Management).
+
+RATE LIMITING algorithms:
+  Token bucket   : tokens refill at fixed rate; each request uses one.
+                   Allows short bursts. Most common.
+  Leaky bucket   : requests leave at a fixed rate. Smooth output.
+  Fixed window   : count per minute. Simple, but bursts at window edges.
+  Sliding window : smoother version of fixed window.
+
+Token bucket pseudocode:
+    function allow(user):
+        bucket = store.get(user)
+        refill = (now - bucket.lastRefill) * ratePerSecond
+        bucket.tokens = min(capacity, bucket.tokens + refill)
+        bucket.lastRefill = now
+        if bucket.tokens >= 1:
+            bucket.tokens -= 1
+            return ALLOW
+        return REJECT (HTTP 429 Too Many Requests)
+
+Q: Offset vs cursor pagination?
+A: Offset (LIMIT 20 OFFSET 10000) gets slower as offset grows and can skip
+   or repeat items when data changes. Cursor uses the last seen id/time, so
+   it is fast and stable.
+
+--------------------------------------------------------------------------------
+3.8 RELIABILITY AND FAULT TOLERANCE
+--------------------------------------------------------------------------------
+  - Remove every SPOF with redundancy (multiple instances, zones, regions).
+  - Failover: active-passive (standby takes over) or active-active (all
+    serve traffic).
+  - Retries with exponential backoff + jitter (random delay) to avoid all
+    clients retrying at the same moment.
+  - Timeouts on every network call. No timeout = hung threads.
+  - Circuit breaker: after many failures, stop calling the service for a
+    while (OPEN), then test a few calls (HALF-OPEN), then resume (CLOSED).
+  - Bulkhead: separate thread/connection pools per dependency so one slow
+    service cannot use up all resources.
+  - Graceful degradation: serve partial results (e.g. show feed without
+    recommendations) instead of failing completely.
+  - Health checks: liveness (is it running?) and readiness (can it take
+    traffic?).
+
+SLA / SLO / SLI:
+  SLI (Service Level Indicator) : the measured number (e.g. 99.95% success)
+  SLO (Service Level Objective) : internal target (e.g. 99.9%)
+  SLA (Service Level Agreement) : contract with customers, with penalties
+
+Disaster recovery terms:
+  RPO (Recovery Point Objective): max data loss allowed (e.g. 5 minutes)
+  RTO (Recovery Time Objective) : max downtime allowed (e.g. 1 hour)
+
+Q: How do you design for 99.99% availability?
+A: Multiple instances across availability zones, redundant LBs, replicated
+   DB with automatic failover, no SPOF, health checks, circuit breakers,
+   blue-green or canary deployments, and multi-region if required.
+
+--------------------------------------------------------------------------------
+3.9 DISTRIBUTED TRANSACTIONS
+--------------------------------------------------------------------------------
+Problem: one business action touches several services/databases.
+
+  Approach          How                                  Trade-off
+  ----------------  -----------------------------------  ----------------------
+  2PC (Two-Phase    Coordinator asks all to "prepare",   Blocking, slow,
+  Commit)           then "commit"                        coordinator is SPOF
+  Saga              Chain of local transactions; on      Eventual consistency,
+                    failure run compensating actions     must design undo steps
+    - Choreography  Services react to each other's       Loose coupling, hard
+                    events                               to trace
+    - Orchestration A central orchestrator tells each    Easier to follow, one
+                    service what to do                   more component
+  Outbox pattern    Write business data + event to an    Guarantees event is
+                    "outbox" table in ONE transaction;   published if data is
+                    a relay publishes the event          saved
+
+Q: Why not just write to DB and then publish to Kafka?
+A: If the app crashes between the two, data and events disagree
+   ("dual write" problem). Outbox pattern fixes this.
+
+Q: Order saga example?
+A: Create order -> reserve stock -> charge payment -> ship.
+   If payment fails: release stock (compensate) -> cancel order.
+
+--------------------------------------------------------------------------------
+3.10 OBSERVABILITY
+--------------------------------------------------------------------------------
+  Logs    : what happened (structured JSON logs with a correlation/trace id)
+  Metrics : numbers over time (latency, error rate, throughput)
+  Traces  : one request's journey across services (OpenTelemetry)
+
+Golden signals to monitor: Latency, Traffic, Errors, Saturation.
+Use percentiles (p50, p95, p99), not averages - averages hide slow requests.
+
+--------------------------------------------------------------------------------
+3.11 SECURITY
+--------------------------------------------------------------------------------
+  Authentication (AuthN): who are you? (OAuth 2.0, OIDC = OpenID Connect)
+  Authorization (AuthZ) : what can you do? (RBAC = Role-Based Access Control)
+  JWT (JSON Web Token)  : signed token carrying user claims; stateless auth.
+  Encryption            : TLS (Transport Layer Security) in transit,
+                          AES encryption at rest.
+  Secrets               : store in a vault (AWS Secrets Manager, Azure Key
+                          Vault), never in code.
+  Protect APIs          : rate limiting, input validation, WAF (Web
+                          Application Firewall).
+
+
+================================================================================
+4. COMMON TRADE-OFFS (SAY THESE OUT LOUD)
+================================================================================
+Interviewers want to hear "I choose X over Y because..., the cost is...".
+
+  Trade-off                          Choose first when...
+  ---------------------------------  -------------------------------------------
+  Consistency vs Availability        Money/inventory -> consistency
+                                     Social/feeds    -> availability
+  Latency vs Consistency             Global users + reads -> eventual + cache
+  SQL vs NoSQL                       Transactions -> SQL; huge simple scale ->
+                                     NoSQL
+  Sync vs Async                      User waits for result -> sync;
+                                     background work -> async
+  Push vs Pull (feeds)               Normal users -> push (fan-out on write)
+                                     Celebrities  -> pull (fan-out on read)
+  Normalize vs Denormalize           Write-heavy/integrity -> normalize
+                                     Read-heavy -> denormalize
+  Strong cache vs Fresh data         Short TTL = fresher but more DB load
+  Monolith vs Microservices          Small team/early stage -> monolith
+                                     Large teams, independent scaling ->
+                                     microservices
+  Batch vs Stream processing         Daily reports -> batch; fraud alerts ->
+                                     stream
+
+
+================================================================================
+5. CLASSIC DESIGN PROBLEMS - SHORT BLUEPRINTS
+================================================================================
+
+5.1 URL SHORTENER (like bit.ly)
+  Requirements : shorten URL, redirect, optional expiry; read-heavy (100:1).
+  Key idea     : generate a short unique code (7 chars of Base62
+                 [a-z, A-Z, 0-9] = 62^7 ~ 3.5 trillion codes).
+  ID generation: counter + Base62 encoding, or a pre-generated key service.
+                 Avoid hashing + truncating (collisions).
+  Storage      : key-value store (code -> long URL).
+  Read path    : cache popular codes in Redis; return HTTP 301 (permanent,
+                 browser caches) or 302 (temporary, lets you count clicks).
+  Deep dive    : unique ID across many servers (range allocation per
+                 server, or Snowflake IDs = timestamp + machine id + sequence).
+
+5.2 RATE LIMITER
+  Where        : API gateway or middleware.
+  Algorithm    : token bucket per user/IP.
+  Storage      : Redis with atomic operations (Lua script) so many app
+                 servers share the same counters.
+  Response     : HTTP 429 with Retry-After header.
+  Deep dive    : race conditions, fail-open vs fail-closed if Redis is down.
+
+5.3 CHAT APPLICATION (like WhatsApp)
+  Connections  : WebSocket servers keep live connections.
+  Routing      : a presence store (Redis) maps user -> which WS server.
+  Delivery     : message saved to DB, then pushed to receiver's WS server;
+                 if offline, store and send push notification.
+  Storage      : wide-column DB (Cassandra) partitioned by conversation_id,
+                 sorted by time.
+  Ordering     : per-conversation sequence number.
+  Receipts     : sent / delivered / read status events.
+  Deep dive    : group chat fan-out, offline sync, end-to-end encryption.
+
+5.4 NEWS FEED (like Twitter/Instagram)
+  Write path   : post saved -> event to queue -> fan-out workers push post id
+                 into followers' feed lists in cache (fan-out on write).
+  Celebrities  : do not fan out; merge their posts at read time (hybrid).
+  Read path    : read precomputed feed from cache, hydrate post details.
+  Media        : object storage (S3 / Azure Blob) + CDN.
+  Deep dive    : ranking, pagination with cursor, cache memory size.
+
+5.5 NOTIFICATION SYSTEM
+  Flow         : services -> notification API -> queue per channel
+                 (email, SMS, push) -> workers -> third-party providers.
+  Features     : user preferences, templates, rate limiting per user,
+                 retries + DLQ, deduplication with idempotency key.
+  Deep dive    : priority queues, scheduling, tracking delivery status.
+
+5.6 PAYMENT SYSTEM
+  Must have    : strong consistency, idempotency keys on every request,
+                 double-entry ledger (every debit has a matching credit),
+                 audit log, reconciliation with payment provider.
+  Pattern      : saga for multi-step flows, outbox for reliable events.
+  Deep dive    : what if provider times out? -> mark PENDING, query provider
+                 status, never charge twice.
+
+5.7 DISTRIBUTED CACHE / KEY-VALUE STORE
+  Partitioning : consistent hashing with virtual nodes.
+  Replication  : N copies, quorum reads/writes (W + R > N).
+  Eviction     : LRU.
+  Failure      : gossip protocol to detect dead nodes; hinted handoff.
+
+5.8 FILE STORAGE (like Google Drive / Dropbox)
+  Upload       : split files into chunks (e.g. 4 MB); upload only changed
+                 chunks; use pre-signed URLs to upload direct to object
+                 storage.
+  Metadata     : SQL DB (file name, owner, versions, chunk list).
+  Sync         : notification service tells other devices about changes.
+  Deep dive    : deduplication by chunk hash, conflict handling.
+
+5.9 VIDEO STREAMING (like YouTube)
+  Upload       : raw video -> object storage -> transcoding workers (queue)
+                 -> multiple resolutions.
+  Playback     : ABR (Adaptive Bitrate Streaming) - player switches quality
+                 based on network speed, using HLS (HTTP Live Streaming) or
+                 DASH (Dynamic Adaptive Streaming over HTTP).
+  Delivery     : CDN for nearly all traffic.
+
+5.10 SEARCH AUTOCOMPLETE
+  Data         : trie (prefix tree) with top-k suggestions stored per node.
+  Updates      : rebuild offline from query logs (batch), not live.
+  Serving      : cache results per prefix; CDN/browser cache for top prefixes.
+
+
+================================================================================
+6. RED FLAGS TO AVOID
+================================================================================
+  - Jumping into the design without asking requirements.
+  - Naming tools ("use Kafka") without saying WHY.
+  - No numbers - never estimating scale.
+  - Single database / single server with no plan for failure.
+  - Ignoring trade-offs or saying "this is the best solution".
+  - Over-engineering a small system (microservices for 1,000 users).
+  - Going silent. Think out loud; the interviewer wants your reasoning.
+  - Ignoring the interviewer's hints. If they ask "what about X?", X matters.
+
+
+================================================================================
+7. FINAL CHECKLIST BEFORE YOU SAY "DONE"
+================================================================================
+  [ ] Requirements (functional + non-functional) written down
+  [ ] Scale estimated (QPS, storage, read:write ratio)
+  [ ] API endpoints defined
+  [ ] Data model + database choice justified
+  [ ] High-level diagram covers the full request path
+  [ ] Caching strategy explained
+  [ ] Scaling plan (stateless services, replicas, sharding)
+  [ ] No single point of failure
+  [ ] Failure handling (retries, timeouts, circuit breaker, DLQ)
+  [ ] Consistency choice explained (CAP)
+  [ ] Monitoring and alerting mentioned
+  [ ] Security (auth, rate limiting, encryption) mentioned
+  [ ] Trade-offs and future improvements stated
+
+================================================================================
+                                   END
+================================================================================

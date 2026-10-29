@@ -202,7 +202,7 @@ Track progress here; tick items off as notes are written.
 
 **_02 – Fundamentals**
 - [x] Vertical vs horizontal scaling; stateless services
-- [ ] Latency vs throughput
+- [x] Latency vs throughput (in scalability.md, with Little's Law)
 - [x] CAP and PACELC
 - [x] Consistency models (strong, eventual, causal, read-your-writes)
 - [x] Replication (leader-follower, multi-leader, leaderless, quorums)

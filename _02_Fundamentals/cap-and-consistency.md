@@ -317,7 +317,7 @@ SELECT display_name FROM users WHERE user_id = 42;   -- QUORUM read overlaps the
 CONSISTENCY ONE;
 UPDATE page_views SET views = views + 1 WHERE page_id = 7;
 
--- Unique username: needs consensus, not just a quorum
+-- Claiming a unique name needs consensus, not just a quorum
 INSERT INTO usernames (name, user_id) VALUES ('ada', 42) IF NOT EXISTS;   -- lightweight transaction (Paxos)
 ```
 

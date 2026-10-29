@@ -1,0 +1,631 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amazon SQS (local)</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%23e7157b'/%3E%3C/svg%3E">
+<style>
+:root{--nav:#232f3e;--nav2:#161e2d;--orange:#ec7211;--orange-h:#eb5f07;--link:#0073bb;--text:#16191f;--muted:#687078;--line:#eaeded;--bg:#f2f3f3;--ok:#1d8102;--err:#d13212}
+*{box-sizing:border-box}
+body{margin:0;font:14px/20px "Amazon Ember","Helvetica Neue",Roboto,Arial,sans-serif;color:var(--text);background:var(--bg)}
+a{color:var(--link);text-decoration:none;cursor:pointer}a:hover{text-decoration:underline}
+header{background:var(--nav);color:#fff;height:40px;display:flex;align-items:center;padding:0 16px;gap:16px}
+header .logo{font-weight:700;letter-spacing:.5px;border:1px solid #fff;padding:0 6px;border-radius:2px;font-size:13px}
+header .svc{color:#ff9900;font-weight:700;display:flex;align-items:center;gap:6px}
+header .dot{width:12px;height:12px;border-radius:2px;background:#e7157b;display:inline-block}
+header .svclink{color:#d5dbdb;font-size:13px;padding:2px 8px;border-radius:2px}header .svclink:hover{background:var(--nav2);text-decoration:none}header .svclink.on{background:#37475a;color:#fff}
+header .sp{flex:1}header .meta{color:#d5dbdb;font-size:12px}
+.layout{display:flex;min-height:calc(100vh - 40px)}
+nav{width:240px;background:#fff;border-right:1px solid var(--line);padding:16px 0;flex:none}
+nav h3{margin:0 20px 12px;font-size:14px}
+nav a{display:block;padding:6px 20px;color:var(--text)}
+nav a.on{font-weight:700;border-left:4px solid var(--orange);padding-left:16px;color:var(--text)}
+nav hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+main{flex:1;padding:20px 28px;min-width:0}
+.crumb{color:var(--muted);font-size:12px;margin-bottom:8px}.crumb span{margin:0 6px}
+h1{font-size:24px;line-height:30px;font-weight:700;margin:0 0 16px}
+h1 .btn{font-size:14px;line-height:20px}
+.card{background:#fff;border:1px solid var(--line);box-shadow:0 1px 1px 0 rgba(0,28,36,.3),1px 1px 1px 0 rgba(0,28,36,.15),-1px 1px 1px 0 rgba(0,28,36,.15);margin-bottom:20px}
+.card>.hd{padding:12px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.card>.hd h2{font-size:18px;line-height:22px;margin:0;flex:1}
+.card>.hd .cnt{color:var(--muted);font-weight:400}
+.card>.bd{padding:16px 20px}
+.btn{font:inherit;font-weight:700;border:1px solid #545b64;background:#fff;color:#545b64;border-radius:2px;padding:3px 20px;height:32px;cursor:pointer}
+.btn:hover{background:#f2f3f3;color:#16191f}
+.btn.primary{background:var(--orange);border-color:var(--orange);color:#fff}
+.btn.primary:hover{background:var(--orange-h);border-color:var(--orange-h)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn.sm{height:28px;padding:1px 14px}
+.menu{position:relative;display:inline-block}
+.menu .items{display:none;position:absolute;right:0;top:34px;background:#fff;border:1px solid var(--line);box-shadow:0 1px 4px rgba(0,28,36,.4);min-width:190px;z-index:5}
+.menu.open .items{display:block}
+.menu .items div{padding:8px 16px;cursor:pointer}.menu .items div:hover{background:#f2f3f3}
+.menu .items div.dis{color:#aab7b8;pointer-events:none}
+input[type=text],input[type=number],select,textarea{font:inherit;border:1px solid #aab7b8;border-radius:2px;padding:4px 10px;min-height:32px;width:100%;background:#fff;color:var(--text)}
+textarea{min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+input:focus,select:focus,textarea:focus{outline:2px solid #0073bb;outline-offset:-1px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-weight:700;color:#545b64;padding:8px 16px;border-bottom:2px solid var(--line);background:#fafafa;white-space:nowrap}
+td{padding:8px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+tbody tr:hover{background:#fafafa}tr.sel{background:#f1faff!important}
+td.n,th.n{text-align:right}
+.empty{text-align:center;padding:32px;color:var(--muted)}.empty b{display:block;color:var(--text);margin-bottom:4px}
+.tools{display:flex;gap:8px;align-items:center}.tools .search{flex:1;max-width:420px}
+.tabs{display:flex;border-bottom:1px solid var(--line);margin-bottom:20px;gap:4px}
+.tabs a{padding:10px 18px;color:var(--muted);font-weight:700;border-bottom:3px solid transparent}
+.tabs a.on{color:var(--text);border-bottom-color:var(--orange)}.tabs a:hover{text-decoration:none;color:var(--text)}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:16px 28px}
+.kv label{display:block;color:var(--muted);font-size:12px;font-weight:700}.kv div.v{word-break:break-all}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.field{margin-bottom:16px}.field>label{display:block;font-weight:700;margin-bottom:2px}.field .hint{color:var(--muted);font-size:12px;margin-bottom:4px}
+.row{display:flex;gap:12px}.row>*{flex:1}
+.tile{border:1px solid #aab7b8;padding:10px 14px;border-radius:2px;display:flex;gap:8px;cursor:pointer;align-items:flex-start}
+.tile.on{border-color:var(--link);background:#f1faff;box-shadow:inset 0 0 0 1px var(--link)}
+.tile b{display:block}.tile span{color:var(--muted);font-size:12px}
+.pill{display:inline-block;padding:0 8px;border-radius:10px;background:#eaeded;font-size:12px}
+.pill.fifo{background:#e1f0fa;color:#0b5a8c}
+.flash{padding:10px 16px;margin-bottom:16px;border-left:4px solid var(--ok);background:#fff;box-shadow:0 1px 1px rgba(0,28,36,.3)}
+.flash.err{border-color:var(--err)}
+.mono{font-family:ui-monospace,Menlo,monospace;font-size:12px}
+pre.body{margin:0;white-space:pre-wrap;word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#fafafa;border:1px solid var(--line);padding:10px;max-height:300px;overflow:auto}
+.modal-bg{position:fixed;inset:0;background:rgba(0,28,36,.55);display:flex;align-items:center;justify-content:center;z-index:20}
+.modal{background:#fff;width:min(720px,92vw);max-height:88vh;overflow:auto;box-shadow:0 4px 12px rgba(0,28,36,.5)}
+.modal .hd{padding:16px 20px;font-size:18px;font-weight:700;display:flex}.modal .hd span{flex:1}.modal .hd a{color:var(--muted)}
+.modal .bd{padding:0 20px 16px}.modal .ft{padding:12px 20px;display:flex;justify-content:flex-end;gap:8px;background:#fafafa;border-top:1px solid var(--line)}
+.attrs .a{display:grid;grid-template-columns:1fr 1fr 2fr auto;gap:8px;margin-bottom:6px}
+@media(max-width:900px){nav{display:none}.kv,.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="logo">aws</span>
+  <span class="svc"><i class="dot"></i> <span id="svcname">Simple Queue Service</span></span>
+  <a class="svclink" href="#/queues" id="l-sqs">SQS</a><a class="svclink" href="#/sns/topics" id="l-sns">SNS</a>
+  <span class="sp"></span>
+  <span class="meta" id="endpoint"></span>
+</header>
+<div class="layout">
+  <nav id="nav"></nav>
+  <main id="app"></main>
+</div>
+<div id="modal"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+$('#endpoint').textContent = location.origin + '/000000000000';
+function renderNav(svc, page) {
+  $('#svcname').textContent = svc === 'sns' ? 'Simple Notification Service' : 'Simple Queue Service';
+  $('#l-sqs').classList.toggle('on', svc === 'sqs'); $('#l-sns').classList.toggle('on', svc === 'sns');
+  const items = svc === 'sns' ? [['Topics', '#/sns/topics', 'topics'], ['Subscriptions', '#/sns/subscriptions', 'subs']] : [['Queues', '#/queues', 'queues']];
+  $('#nav').innerHTML = `<h3>Amazon ${svc.toUpperCase()}</h3>${items.map(([l, h, k]) => `<a href="${h}" class="${k === page ? 'on' : ''}">${l}</a>`).join('')}
+    <hr><div style="padding:0 20px;color:var(--muted);font-size:12px">Local emulator<br>Account 000000000000<br>Data lives in a Docker volume.</div>`;
+}
+const sns = (action, body = {}) => api('AmazonSNS.' + action, body);
+
+
+const sqs = (action, body = {}) => api('AmazonSQS.' + action, body);
+async function api(target, body) {
+  const r = await fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-amz-json-1.0', 'X-Amz-Target': target }, body: JSON.stringify(body) });
+  const j = await r.json();
+  if (!r.ok) throw new Error(j.message || j.__type || 'Request failed');
+  return j;
+}
+const nameOf = (url) => url.split('/').pop();
+const fmtDate = (s) => new Date(Number(s) * 1000).toLocaleString();
+const fmtSecs = (s) => { s = Number(s); if (s % 86400 === 0 && s >= 86400) return s / 86400 + ' day(s)'; if (s % 3600 === 0 && s >= 3600) return s / 3600 + ' hour(s)'; if (s % 60 === 0 && s >= 60) return s / 60 + ' minute(s)'; return s + ' second(s)'; };
+
+let flash = null, timer = null, state = { sel: null, filter: '', tab: 'send' };
+const setFlash = (msg, err) => { flash = { msg, err }; };
+const flashHtml = () => { if (!flash) return ''; const h = `<div class="flash ${flash.err ? 'err' : ''}">${esc(flash.msg)}</div>`; flash = null; return h; };
+
+async function listAll() {
+  const urls = (await sqs('ListQueues')).QueueUrls || [];
+  return Promise.all(urls.map(async (u) => ({ url: u, name: nameOf(u), a: (await sqs('GetQueueAttributes', { QueueUrl: u, AttributeNames: ['All'] })).Attributes })));
+}
+
+// ---------- queues list ----------
+async function viewList() {
+  const all = await listAll();
+  const rows = all.filter((q) => q.name.toLowerCase().includes(state.filter.toLowerCase()));
+  const sel = all.find((q) => q.name === state.sel);
+  const dis = sel ? '' : 'dis';
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SQS<span>›</span>Queues</div>
+    ${flashHtml()}
+    <div class="card">
+      <div class="hd"><h2>Queues <span class="cnt">(${rows.length})</span></h2>
+        <button class="btn" id="refresh">↻</button>
+        <button class="btn" id="b-view" ${sel ? '' : 'disabled'}>View details</button>
+        <button class="btn" id="b-del" ${sel ? '' : 'disabled'}>Delete</button>
+        <button class="btn" id="b-purge" ${sel ? '' : 'disabled'}>Purge</button>
+        <button class="btn" id="b-send" ${sel ? '' : 'disabled'}>Send and receive messages</button>
+        <a class="btn primary" style="display:inline-block;line-height:24px;text-decoration:none" href="#/create">Create queue</a>
+      </div>
+      <div class="bd"><div class="tools"><input class="search" type="text" id="filter" placeholder="Search queues" value="${esc(state.filter)}"></div></div>
+      <table><thead><tr><th style="width:36px"></th><th>Name</th><th>Type</th><th>Created</th><th class="n">Messages available</th><th class="n">Messages in flight</th><th class="n">Delayed</th></tr></thead>
+      <tbody>${rows.map((q) => `<tr class="${q.name === state.sel ? 'sel' : ''}" data-n="${esc(q.name)}">
+        <td><input type="radio" ${q.name === state.sel ? 'checked' : ''}></td>
+        <td><a href="#/queues/${encodeURIComponent(q.name)}">${esc(q.name)}</a></td>
+        <td><span class="pill ${q.a.FifoQueue ? 'fifo' : ''}">${q.a.FifoQueue ? 'FIFO' : 'Standard'}</span></td>
+        <td>${fmtDate(q.a.CreatedTimestamp)}</td>
+        <td class="n">${q.a.ApproximateNumberOfMessages}</td><td class="n">${q.a.ApproximateNumberOfMessagesNotVisible}</td><td class="n">${q.a.ApproximateNumberOfMessagesDelayed}</td></tr>`).join('')}
+      </tbody></table>
+      ${rows.length ? '' : `<div class="empty"><b>No queues</b>${all.length ? 'No queues match your search.' : 'You don’t have any queues in this region.'}</div>`}
+    </div>`;
+  $('#refresh').onclick = route;
+  $('#filter').oninput = (e) => { state.filter = e.target.value; clearTimeout(timer); viewList().then(() => { const f = $('#filter'); f.focus(); f.setSelectionRange(f.value.length, f.value.length); }); };
+  document.querySelectorAll('tbody tr').forEach((tr) => tr.onclick = (e) => { if (e.target.tagName === 'A') return; state.sel = tr.dataset.n; viewList(); });
+  if (sel) {
+    $('#b-view').onclick = () => (location.hash = '#/queues/' + encodeURIComponent(sel.name));
+    $('#b-send').onclick = () => { state.tab = 'send'; location.hash = '#/queues/' + encodeURIComponent(sel.name); };
+    $('#b-del').onclick = () => confirmModal(`Delete queue`, `Are you sure you want to delete the queue <b>${esc(sel.name)}</b>? This can’t be undone.`, 'Delete', 'delete', async () => { await sqs('DeleteQueue', { QueueUrl: sel.url }); state.sel = null; setFlash(`Queue ${sel.name} deleted successfully.`); });
+    $('#b-purge').onclick = () => confirmModal(`Purge queue`, `All messages in <b>${esc(sel.name)}</b> will be deleted. This can’t be undone.`, 'Purge', 'purge', async () => { await sqs('PurgeQueue', { QueueUrl: sel.url }); setFlash(`Queue ${sel.name} purged successfully.`); });
+  }
+  timer = setTimeout(() => { if (!$('#modal').firstChild && document.activeElement?.id !== 'filter') viewList().catch(() => {}); }, 3000);
+}
+
+function confirmModal(title, html, label, word, action) {
+  $('#modal').innerHTML = `<div class="modal-bg"><div class="modal"><div class="hd"><span>${title}</span><a id="x">✕</a></div>
+    <div class="bd"><p>${html}</p><div class="field"><div class="hint">To confirm, type <b>${word}</b> below.</div><input type="text" id="cf"></div></div>
+    <div class="ft"><button class="btn" id="no">Cancel</button><button class="btn primary" id="yes" disabled>${label}</button></div></div></div>`;
+  const close = () => ($('#modal').innerHTML = '');
+  $('#x').onclick = $('#no').onclick = close;
+  $('#cf').oninput = (e) => ($('#yes').disabled = e.target.value !== word);
+  $('#yes').onclick = async () => { try { await action(); } catch (e) { setFlash(e.message, true); } close(); route(); };
+  $('#cf').focus();
+}
+
+// ---------- create queue ----------
+async function viewCreate() {
+  let fifo = false;
+  const await_others = await listAll();
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SQS<span>›</span><a href="#/queues">Queues</a><span>›</span>Create queue</div>
+    <h1>Create queue</h1><div id="err"></div>
+    <div class="card"><div class="hd"><h2>Details</h2></div><div class="bd">
+      <div class="field"><label>Type</label><div class="hint">Choose the queue type for your application. You can’t change the queue type after you create a queue.</div>
+        <div class="row"><div class="tile on" data-t="std"><input type="radio" checked><div><b>Standard</b><span>At-least-once delivery, best-effort ordering, nearly unlimited throughput.</span></div></div>
+        <div class="tile" data-t="fifo"><input type="radio"><div><b>FIFO</b><span>First-in-first-out delivery and exactly-once processing within a message group.</span></div></div></div></div>
+      <div class="field"><label>Name</label><input type="text" id="name" placeholder="my-queue" maxlength="80"><div class="hint" id="nhint">Up to 80 characters: alphanumeric, hyphens (-) and underscores (_).</div></div>
+    </div></div>
+    <div class="card"><div class="hd"><h2>Configuration</h2></div><div class="bd"><div class="grid2">
+      <div class="field"><label>Visibility timeout (seconds)</label><div class="hint">0 – 43,200</div><input type="number" id="VisibilityTimeout" value="30"></div>
+      <div class="field"><label>Message retention period (seconds)</label><div class="hint">60 – 1,209,600</div><input type="number" id="MessageRetentionPeriod" value="345600"></div>
+      <div class="field"><label>Delivery delay (seconds)</label><div class="hint">0 – 900</div><input type="number" id="DelaySeconds" value="0"></div>
+      <div class="field"><label>Receive message wait time (seconds)</label><div class="hint">0 – 20. Above 0 enables long polling.</div><input type="number" id="ReceiveMessageWaitTimeSeconds" value="0"></div>
+      <div class="field"><label>Maximum message size (bytes)</label><div class="hint">1,024 – 262,144</div><input type="number" id="MaximumMessageSize" value="262144"></div>
+      <div class="field" id="cbd" style="display:none"><label>Content-based deduplication</label><div class="hint">Use a SHA-style hash of the body as the deduplication ID.</div><select id="ContentBasedDeduplication"><option value="false">Disabled</option><option value="true">Enabled</option></select></div>
+    </div></div></div>
+    <div class="card"><div class="hd"><h2>Dead-letter queue <span class="cnt">– optional</span></h2></div><div class="bd">
+      <div class="field"><label>Dead-letter queue</label><select id="dlq-on"><option value="0">Disabled</option><option value="1">Enabled</option></select></div>
+      <div class="grid2" id="dlq-f" style="display:none">
+        <div class="field"><label>Queue</label><select id="dlq-q"></select></div>
+        <div class="field"><label>Maximum receives</label><div class="hint">1 – 1,000. Receives before a message moves to the dead-letter queue.</div><input type="number" id="dlq-max" value="10"></div></div>
+    </div></div>
+    <div style="text-align:right"><a class="btn" style="display:inline-block;line-height:24px;text-decoration:none" href="#/queues">Cancel</a> <button class="btn primary" id="go">Create queue</button></div>`;
+  const fillDlq = () => { $('#dlq-q').innerHTML = await_others.filter((q) => q.name.endsWith('.fifo') === fifo).map((q) => `<option value="${esc(q.name)}">${esc(q.name)}</option>`).join('') || '<option value="">No eligible queues</option>'; };
+  fillDlq();
+  document.querySelectorAll('.tile').forEach((t) => t.onclick = () => {
+    fifo = t.dataset.t === 'fifo';
+    document.querySelectorAll('.tile').forEach((x) => { x.classList.toggle('on', x === t); x.querySelector('input').checked = x === t; });
+    $('#cbd').style.display = fifo ? '' : 'none';
+    $('#nhint').textContent = fifo ? 'FIFO queue names must end with .fifo (added automatically).' : 'Up to 80 characters: alphanumeric, hyphens (-) and underscores (_).';
+    fillDlq();
+  });
+  $('#dlq-on').onchange = (e) => ($('#dlq-f').style.display = e.target.value === '1' ? '' : 'none');
+  $('#go').onclick = async () => {
+    let name = $('#name').value.trim();
+    if (fifo && name && !name.endsWith('.fifo')) name += '.fifo';
+    const Attributes = {};
+    for (const k of ['VisibilityTimeout', 'MessageRetentionPeriod', 'DelaySeconds', 'ReceiveMessageWaitTimeSeconds', 'MaximumMessageSize']) Attributes[k] = $('#' + k).value;
+    if (fifo) { Attributes.FifoQueue = 'true'; Attributes.ContentBasedDeduplication = $('#ContentBasedDeduplication').value; }
+    if ($('#dlq-on').value === '1') {
+      if (!$('#dlq-q').value) return ($('#err').innerHTML = '<div class="flash err">Select a dead-letter queue.</div>');
+      Attributes.RedrivePolicy = JSON.stringify({ deadLetterTargetArn: `arn:aws:sqs:us-east-1:000000000000:${$('#dlq-q').value}`, maxReceiveCount: Number($('#dlq-max').value) });
+    }
+    try {
+      await sqs('CreateQueue', { QueueName: name, Attributes });
+      state.tab = 'send';
+      setFlash(`Queue ${name} created successfully.`);
+      location.hash = '#/queues/' + encodeURIComponent(name);
+    } catch (e) { $('#err').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+}
+
+// ---------- queue details ----------
+let polled = [];
+async function viewQueue(name) {
+  let q;
+  try { q = (await listAll()).find((x) => x.name === name); } catch (e) { q = null; }
+  if (!q) { setFlash(`Queue ${name} does not exist.`, true); location.hash = '#/queues'; return; }
+  const a = q.a, fifo = !!a.FifoQueue;
+  const redrive = a.RedrivePolicy ? JSON.parse(a.RedrivePolicy) : null;
+  const tab = state.tab;
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SQS<span>›</span><a href="#/queues">Queues</a><span>›</span>${esc(name)}</div>
+    ${flashHtml()}
+    <h1>${esc(name)}
+      <span class="menu" id="actions" style="float:right"><button class="btn">Actions ▾</button><span class="items">
+        <div data-a="edit">Edit</div><div data-a="purge">Purge</div><div data-a="delete">Delete</div></span></span>
+      <a class="btn" style="float:right;margin-right:8px;font-size:14px" id="rf">↻</a></h1>
+    <div class="card"><div class="hd"><h2>Details</h2></div><div class="bd"><div class="kv">
+      <div><label>Name</label><div class="v">${esc(name)}</div></div>
+      <div><label>Type</label><div class="v">${fifo ? 'FIFO' : 'Standard'}</div></div>
+      <div><label>ARN</label><div class="v mono">${esc(a.QueueArn)}</div></div>
+      <div><label>URL</label><div class="v mono">${esc(q.url)}</div></div>
+      <div><label>Messages available</label><div class="v">${a.ApproximateNumberOfMessages}</div></div>
+      <div><label>Messages in flight</label><div class="v">${a.ApproximateNumberOfMessagesNotVisible}</div></div>
+      <div><label>Delayed</label><div class="v">${a.ApproximateNumberOfMessagesDelayed}</div></div>
+      <div><label>Created</label><div class="v">${fmtDate(a.CreatedTimestamp)}</div></div>
+      <div><label>Last updated</label><div class="v">${fmtDate(a.LastModifiedTimestamp)}</div></div>
+    </div></div></div>
+    <div class="tabs"><a data-t="send" class="${tab === 'send' ? 'on' : ''}">Send and receive messages</a><a data-t="cfg" class="${tab === 'cfg' ? 'on' : ''}">Configuration</a><a data-t="dlq" class="${tab === 'dlq' ? 'on' : ''}">Dead-letter queue</a></div>
+    <div id="tab"></div>`;
+  $('#rf').onclick = () => route();
+  document.querySelectorAll('.tabs a').forEach((t) => (t.onclick = () => { state.tab = t.dataset.t; viewQueue(name); }));
+  const menu = $('#actions'); menu.firstElementChild.onclick = (e) => { e.stopPropagation(); menu.classList.toggle('open'); };
+  document.onclick = () => menu.classList.remove('open');
+  menu.querySelectorAll('[data-a]').forEach((d) => d.onclick = () => {
+    const act = d.dataset.a;
+    if (act === 'edit') { state.tab = 'cfg'; state.edit = true; viewQueue(name); }
+    if (act === 'purge') confirmModal('Purge queue', `All messages in <b>${esc(name)}</b> will be deleted.`, 'Purge', 'purge', async () => { await sqs('PurgeQueue', { QueueUrl: q.url }); polled = []; setFlash('Queue purged successfully.'); });
+    if (act === 'delete') confirmModal('Delete queue', `Delete <b>${esc(name)}</b>? This can’t be undone.`, 'Delete', 'delete', async () => { await sqs('DeleteQueue', { QueueUrl: q.url }); state.sel = null; setFlash(`Queue ${name} deleted successfully.`); location.hash = '#/queues'; });
+  });
+  const t = $('#tab');
+  if (tab === 'send') tabSend(t, q, fifo);
+  else if (tab === 'cfg') tabCfg(t, q);
+  else tabDlq(t, q, redrive);
+}
+
+function tabSend(t, q, fifo) {
+  t.innerHTML = `
+    <div class="card"><div class="hd"><h2>Send message</h2></div><div class="bd"><div id="sres"></div>
+      <div class="field"><label>Message body</label><textarea id="body" placeholder='{"orderId": 42}'></textarea></div>
+      <div class="row">
+        <div class="field"><label>Delivery delay (seconds)</label><input type="number" id="delay" ${fifo ? 'disabled' : ''} placeholder="queue default"></div>
+        ${fifo ? `<div class="field"><label>Message group ID <i style="color:var(--err)">*</i></label><input type="text" id="gid" value="default"></div>
+        <div class="field"><label>Message deduplication ID</label><input type="text" id="did" placeholder="optional if content-based"></div>` : ''}
+      </div>
+      <div class="field attrs"><label>Message attributes <span style="font-weight:400;color:var(--muted)">– optional</span></label><div id="attrs"></div><button class="btn sm" id="addattr">Add new attribute</button></div>
+      <div style="text-align:right"><button class="btn primary" id="send">Send message</button></div>
+    </div></div>
+    <div class="card"><div class="hd"><h2>Receive messages <span class="cnt">(${polled.length})</span></h2>
+        <button class="btn" id="del" ${polled.some((m) => m._sel) ? '' : 'disabled'}>Delete</button>
+        <button class="btn primary" id="poll">Poll for messages</button></div>
+      <div class="bd"><div class="row" style="max-width:520px"><div class="field"><label>Max messages</label><input type="number" id="maxn" value="10" min="1" max="10"></div>
+        <div class="field"><label>Polling duration (s)</label><input type="number" id="wait" value="0" min="0" max="20"></div></div>
+        <div class="hint" style="color:var(--muted)">Received messages become invisible for the queue’s visibility timeout (${q.a.VisibilityTimeout}s) and their receive count increases.</div></div>
+      <table><thead><tr><th style="width:36px"></th><th>ID</th><th>Sent</th><th class="n">Receive count</th><th>Size</th><th></th></tr></thead><tbody>
+      ${polled.map((m, i) => `<tr><td><input type="checkbox" data-i="${i}" ${m._sel ? 'checked' : ''}></td><td class="mono">${esc(m.MessageId)}</td>
+        <td>${m.Attributes ? new Date(Number(m.Attributes.SentTimestamp)).toLocaleTimeString() : ''}</td><td class="n">${m.Attributes?.ApproximateReceiveCount ?? ''}</td>
+        <td>${new Blob([m.Body]).size} B</td><td><a data-v="${i}">View</a></td></tr>`).join('')}</tbody></table>
+      ${polled.length ? '' : '<div class="empty"><b>No messages</b>Choose “Poll for messages” to receive messages from this queue.</div>'}
+    </div>`;
+  const addAttr = () => { const d = document.createElement('div'); d.className = 'a'; d.innerHTML = '<input type="text" placeholder="Name" class="an"><select class="at"><option>String</option><option>Number</option></select><input type="text" placeholder="Value" class="av"><a class="x">Remove</a>'; d.querySelector('.x').onclick = () => d.remove(); $('#attrs').appendChild(d); };
+  $('#addattr').onclick = addAttr;
+  $('#send').onclick = async () => {
+    const p = { QueueUrl: q.url, MessageBody: $('#body').value };
+    if (!fifo && $('#delay').value !== '') p.DelaySeconds = Number($('#delay').value);
+    if (fifo) { p.MessageGroupId = $('#gid').value; if ($('#did').value) p.MessageDeduplicationId = $('#did').value; }
+    const ma = {};
+    document.querySelectorAll('#attrs .a').forEach((d) => { const n = d.querySelector('.an').value.trim(); if (n) ma[n] = { DataType: d.querySelector('.at').value, StringValue: d.querySelector('.av').value }; });
+    if (Object.keys(ma).length) p.MessageAttributes = ma;
+    try {
+      const r = await sqs('SendMessage', p);
+      $('#sres').innerHTML = `<div class="flash">Message sent. ID: <span class="mono">${esc(r.MessageId)}</span></div>`;
+    } catch (e) { $('#sres').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+  $('#poll').onclick = async () => {
+    $('#poll').disabled = true; $('#poll').textContent = 'Polling…';
+    try {
+      const r = await sqs('ReceiveMessage', { QueueUrl: q.url, MaxNumberOfMessages: Number($('#maxn').value), WaitTimeSeconds: Number($('#wait').value), AttributeNames: ['All'], MessageAttributeNames: ['All'] });
+      polled = (r.Messages || []).concat(polled.filter((o) => !(r.Messages || []).some((n) => n.MessageId === o.MessageId)));
+    } catch (e) { setFlash(e.message, true); }
+    viewQueue(q.name);
+  };
+  t.querySelectorAll('[data-i]').forEach((c) => (c.onchange = () => { polled[c.dataset.i]._sel = c.checked; $('#del').disabled = !polled.some((m) => m._sel); }));
+  $('#del').onclick = async () => {
+    const sel = polled.filter((m) => m._sel);
+    try { await sqs('DeleteMessageBatch', { QueueUrl: q.url, Entries: sel.map((m, i) => ({ Id: String(i), ReceiptHandle: m.ReceiptHandle })) }); polled = polled.filter((m) => !m._sel); setFlash(`${sel.length} message(s) deleted.`); }
+    catch (e) { setFlash(e.message, true); }
+    viewQueue(q.name);
+  };
+  t.querySelectorAll('[data-v]').forEach((a) => (a.onclick = () => {
+    const m = polled[a.dataset.v];
+    let b = m.Body; try { b = JSON.stringify(JSON.parse(b), null, 2); } catch {}
+    $('#modal').innerHTML = `<div class="modal-bg"><div class="modal"><div class="hd"><span>Message</span><a id="x">✕</a></div><div class="bd">
+      <div class="field"><label>ID</label><div class="mono">${esc(m.MessageId)}</div></div>
+      <div class="field"><label>Body</label><pre class="body">${esc(b)}</pre></div>
+      <div class="field"><label>Attributes</label><pre class="body">${esc(JSON.stringify({ ...m.Attributes, ...(m.MessageAttributes && { MessageAttributes: m.MessageAttributes }) }, null, 2))}</pre></div>
+      <div class="field"><label>Receipt handle</label><div class="mono" style="word-break:break-all">${esc(m.ReceiptHandle)}</div></div></div>
+      <div class="ft"><button class="btn" id="c">Done</button></div></div></div>`;
+    $('#x').onclick = $('#c').onclick = () => ($('#modal').innerHTML = '');
+  }));
+}
+
+const CFG = [['VisibilityTimeout', 'Visibility timeout', true], ['MessageRetentionPeriod', 'Message retention period', true], ['DelaySeconds', 'Delivery delay', true], ['ReceiveMessageWaitTimeSeconds', 'Receive message wait time', true], ['MaximumMessageSize', 'Maximum message size', false]];
+function tabCfg(t, q) {
+  const edit = state.edit; state.edit = false;
+  if (edit) {
+    t.innerHTML = `<div class="card"><div class="hd"><h2>Edit configuration</h2></div><div class="bd"><div id="e"></div><div class="grid2">
+      ${CFG.map(([k, l]) => `<div class="field"><label>${l}${k === 'MaximumMessageSize' ? ' (bytes)' : ' (seconds)'}</label><input type="number" id="${k}" value="${esc(q.a[k])}"></div>`).join('')}
+      </div><div style="text-align:right"><button class="btn" id="cn">Cancel</button> <button class="btn primary" id="sv">Save</button></div></div></div>`;
+    $('#cn').onclick = () => viewQueue(q.name);
+    $('#sv').onclick = async () => {
+      const Attributes = {}; CFG.forEach(([k]) => (Attributes[k] = $('#' + k).value));
+      try { await sqs('SetQueueAttributes', { QueueUrl: q.url, Attributes }); setFlash('Queue updated successfully.'); viewQueue(q.name); }
+      catch (e) { $('#e').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+    };
+    return;
+  }
+  t.innerHTML = `<div class="card"><div class="hd"><h2>Configuration</h2><button class="btn" id="ed">Edit</button></div><div class="bd"><div class="kv">
+    ${CFG.map(([k, l, secs]) => `<div><label>${l}</label><div class="v">${secs ? fmtSecs(q.a[k]) : Number(q.a[k]).toLocaleString() + ' bytes'}</div></div>`).join('')}
+    ${q.a.FifoQueue ? `<div><label>Content-based deduplication</label><div class="v">${q.a.ContentBasedDeduplication === 'true' ? 'Enabled' : 'Disabled'}</div></div>` : ''}
+    </div></div></div>`;
+  $('#ed').onclick = () => { state.edit = true; viewQueue(q.name); };
+}
+
+async function tabDlq(t, q, redrive) {
+  let sources = [];
+  try { sources = (await sqs('ListDeadLetterSourceQueues', { QueueUrl: q.url })).queueUrls || []; } catch {}
+  t.innerHTML = `<div class="card"><div class="hd"><h2>Dead-letter queue</h2></div><div class="bd"><div class="kv">
+    <div><label>Dead-letter queue</label><div class="v">${redrive ? `<a href="#/queues/${encodeURIComponent(redrive.deadLetterTargetArn.split(':').pop())}">${esc(redrive.deadLetterTargetArn.split(':').pop())}</a>` : 'Disabled'}</div></div>
+    ${redrive ? `<div><label>Maximum receives</label><div class="v">${esc(redrive.maxReceiveCount)}</div></div>` : ''}
+    <div><label>Queues using this as DLQ</label><div class="v">${sources.length ? sources.map((u) => `<a href="#/queues/${encodeURIComponent(nameOf(u))}">${esc(nameOf(u))}</a>`).join(', ') : '–'}</div></div>
+    </div></div></div>`;
+}
+
+// ---------- SNS ----------
+const topicName = (arn) => arn.split(':').pop();
+const subId = (arn) => arn.split(':').pop();
+const PROTO_LABEL = { sqs: 'Amazon SQS', http: 'HTTP', https: 'HTTPS', email: 'Email', 'email-json': 'Email-JSON', sms: 'SMS' };
+
+async function snsTopics() {
+  const arns = (await sns('ListTopics')).Topics.map((t) => t.TopicArn);
+  return Promise.all(arns.map(async (arn) => ({ arn, name: topicName(arn), a: (await sns('GetTopicAttributes', { TopicArn: arn })).Attributes })));
+}
+
+async function routeSns(h) {
+  const page = h.startsWith('#/sns/subscriptions') ? 'subs' : 'topics';
+  renderNav('sns', page);
+  if (h.startsWith('#/sns/topics/create')) return snsCreate();
+  if (h.startsWith('#/sns/topics/')) { state.snsLast = h; return snsTopicView(decodeURIComponent(h.slice(13))); }
+  if (page === 'subs') return snsSubsView();
+  return snsList();
+}
+
+async function snsList() {
+  const all = await snsTopics();
+  const rows = all.filter((t) => t.name.toLowerCase().includes(state.filter.toLowerCase()));
+  const sel = all.find((t) => t.name === state.snsSel);
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SNS<span>›</span>Topics</div>${flashHtml()}
+    <div class="card"><div class="hd"><h2>Topics <span class="cnt">(${rows.length})</span></h2>
+      <button class="btn" id="refresh">↻</button>
+      <button class="btn" id="b-pub" ${sel ? '' : 'disabled'}>Publish message</button>
+      <button class="btn" id="b-del" ${sel ? '' : 'disabled'}>Delete</button>
+      <a class="btn primary" style="display:inline-block;line-height:24px;text-decoration:none" href="#/sns/topics/create">Create topic</a></div>
+      <div class="bd"><div class="tools"><input class="search" type="text" id="filter" placeholder="Search topics" value="${esc(state.filter)}"></div></div>
+      <table><thead><tr><th style="width:36px"></th><th>Name</th><th>Type</th><th>ARN</th><th class="n">Confirmed</th><th class="n">Pending</th></tr></thead><tbody>
+      ${rows.map((t) => `<tr data-n="${esc(t.name)}" class="${t.name === state.snsSel ? 'sel' : ''}"><td><input type="radio" ${t.name === state.snsSel ? 'checked' : ''}></td>
+        <td><a href="#/sns/topics/${encodeURIComponent(t.name)}">${esc(t.name)}</a></td><td><span class="pill ${t.a.FifoTopic ? 'fifo' : ''}">${t.a.FifoTopic ? 'FIFO' : 'Standard'}</span></td>
+        <td class="mono">${esc(t.arn)}</td><td class="n">${t.a.SubscriptionsConfirmed}</td><td class="n">${t.a.SubscriptionsPending}</td></tr>`).join('')}</tbody></table>
+      ${rows.length ? '' : `<div class="empty"><b>No topics</b>${all.length ? 'No topics match your search.' : 'Create a topic to start publishing messages.'}</div>`}</div>`;
+  $('#refresh').onclick = route;
+  $('#filter').oninput = (e) => { state.filter = e.target.value; snsList().then(() => { const f = $('#filter'); f.focus(); f.setSelectionRange(f.value.length, f.value.length); }); };
+  document.querySelectorAll('tbody tr').forEach((tr) => (tr.onclick = (e) => { if (e.target.tagName === 'A') return; state.snsSel = tr.dataset.n; snsList(); }));
+  if (sel) {
+    $('#b-pub').onclick = () => { state.snsTab = 'pub'; location.hash = '#/sns/topics/' + encodeURIComponent(sel.name); };
+    $('#b-del').onclick = () => confirmModal('Delete topic', `Delete <b>${esc(sel.name)}</b> and its subscriptions?`, 'Delete', 'delete', async () => { await sns('DeleteTopic', { TopicArn: sel.arn }); state.snsSel = null; setFlash(`Topic ${sel.name} deleted successfully.`); });
+  }
+}
+
+function snsCreate() {
+  let fifo = false;
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SNS<span>›</span><a href="#/sns/topics">Topics</a><span>›</span>Create topic</div><h1>Create topic</h1><div id="err"></div>
+    <div class="card"><div class="hd"><h2>Details</h2></div><div class="bd">
+      <div class="field"><label>Type</label><div class="hint">You can’t change the topic type after you create it.</div>
+        <div class="row"><div class="tile on" data-t="std"><input type="radio" checked><div><b>Standard</b><span>Best-effort ordering, at-least-once delivery. Delivers to SQS, HTTP(S), email and SMS.</span></div></div>
+        <div class="tile" data-t="fifo"><input type="radio"><div><b>FIFO</b><span>Strict ordering and deduplication. Delivers to FIFO SQS queues only.</span></div></div></div></div>
+      <div class="field"><label>Name</label><input type="text" id="name" placeholder="my-topic" maxlength="256"><div class="hint" id="nhint">Alphanumeric, hyphens (-) and underscores (_).</div></div>
+      <div class="field"><label>Display name <span style="font-weight:400;color:var(--muted)">– optional</span></label><input type="text" id="dn" maxlength="100"></div>
+      <div class="field" id="cbd" style="display:none"><label>Content-based deduplication</label><select id="cb"><option value="false">Disabled</option><option value="true">Enabled</option></select></div>
+    </div></div>
+    <div style="text-align:right"><a class="btn" style="display:inline-block;line-height:24px;text-decoration:none" href="#/sns/topics">Cancel</a> <button class="btn primary" id="go">Create topic</button></div>`;
+  document.querySelectorAll('.tile').forEach((t) => (t.onclick = () => {
+    fifo = t.dataset.t === 'fifo';
+    document.querySelectorAll('.tile').forEach((x) => { x.classList.toggle('on', x === t); x.querySelector('input').checked = x === t; });
+    $('#cbd').style.display = fifo ? '' : 'none';
+    $('#nhint').textContent = fifo ? 'FIFO topic names end with .fifo (added automatically).' : 'Alphanumeric, hyphens (-) and underscores (_).';
+  }));
+  $('#go').onclick = async () => {
+    let name = $('#name').value.trim();
+    if (fifo && name && !name.endsWith('.fifo')) name += '.fifo';
+    const Attributes = {};
+    if ($('#dn').value) Attributes.DisplayName = $('#dn').value;
+    if (fifo) { Attributes.FifoTopic = 'true'; Attributes.ContentBasedDeduplication = $('#cb').value; }
+    try { await sns('CreateTopic', { Name: name, Attributes }); state.snsTab = 'subs'; setFlash(`Topic ${name} created successfully.`); location.hash = '#/sns/topics/' + encodeURIComponent(name); }
+    catch (e) { $('#err').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+}
+
+async function snsTopicView(name) {
+  let t;
+  try { t = (await snsTopics()).find((x) => x.name === name); } catch { t = null; }
+  if (!t) { setFlash(`Topic ${name} does not exist.`, true); location.hash = '#/sns/topics'; return; }
+  const fifo = !!t.a.FifoTopic, tab = state.snsTab || 'subs';
+  $('#app').innerHTML = `
+    <div class="crumb">Amazon SNS<span>›</span><a href="#/sns/topics">Topics</a><span>›</span>${esc(name)}</div>${flashHtml()}
+    <h1>${esc(name)} <button class="btn" id="del" style="float:right">Delete</button> <a class="btn" style="float:right;margin-right:8px;font-size:14px" id="rf">↻</a>
+      <button class="btn primary" id="pubtop" style="float:right;margin-right:8px">Publish message</button></h1>
+    <div class="card"><div class="hd"><h2>Details</h2></div><div class="bd"><div class="kv">
+      <div><label>Name</label><div class="v">${esc(name)}</div></div><div><label>Type</label><div class="v">${fifo ? 'FIFO' : 'Standard'}</div></div>
+      <div><label>Display name</label><div class="v">${esc(t.a.DisplayName) || '–'}</div></div>
+      <div><label>ARN</label><div class="v mono">${esc(t.arn)}</div></div>
+      <div><label>Subscriptions confirmed</label><div class="v">${t.a.SubscriptionsConfirmed}</div></div><div><label>Subscriptions pending</label><div class="v">${t.a.SubscriptionsPending}</div></div>
+    </div></div></div>
+    <div class="tabs"><a data-t="subs" class="${tab === 'subs' ? 'on' : ''}">Subscriptions</a><a data-t="pub" class="${tab === 'pub' ? 'on' : ''}">Publish message</a><a data-t="log" class="${tab === 'log' ? 'on' : ''}">Delivery log</a></div><div id="tab"></div>`;
+  $('#rf').onclick = route;
+  $('#pubtop').onclick = () => { state.snsTab = 'pub'; snsTopicView(name); };
+  $('#del').onclick = () => confirmModal('Delete topic', `Delete <b>${esc(name)}</b> and its subscriptions?`, 'Delete', 'delete', async () => { await sns('DeleteTopic', { TopicArn: t.arn }); state.snsSel = null; setFlash(`Topic ${name} deleted successfully.`); location.hash = '#/sns/topics'; });
+  document.querySelectorAll('.tabs a').forEach((a) => (a.onclick = () => { state.snsTab = a.dataset.t; snsTopicView(name); }));
+  if (tab === 'subs') await snsSubsTab($('#tab'), t);
+  else if (tab === 'pub') snsPublishTab($('#tab'), t, fifo);
+  else await snsLogTab($('#tab'), t);
+}
+
+async function subsFor(topicArn) {
+  const list = (topicArn ? await sns('ListSubscriptionsByTopic', { TopicArn: topicArn }) : await sns('ListSubscriptions')).Subscriptions;
+  return Promise.all(list.map(async (s) => {
+    const arn = s.SubscriptionArn;
+    return { ...s, attrs: arn === 'PendingConfirmation' ? {} : (await sns('GetSubscriptionAttributes', { SubscriptionArn: arn })).Attributes };
+  }));
+}
+
+const subTable = (subs, showTopic) => `<table><thead><tr><th>ID</th>${showTopic ? '<th>Topic</th>' : ''}<th>Protocol</th><th>Endpoint</th><th>Status</th><th>Raw</th><th>Filter</th><th></th></tr></thead><tbody>
+  ${subs.map((s, i) => `<tr><td class="mono">${s.attrs.SubscriptionArn ? esc(subId(s.attrs.SubscriptionArn).slice(0, 8)) + '…' : '–'}</td>
+  ${showTopic ? `<td><a href="#/sns/topics/${encodeURIComponent(topicName(s.TopicArn))}">${esc(topicName(s.TopicArn))}</a></td>` : ''}
+  <td>${PROTO_LABEL[s.Protocol] || esc(s.Protocol)}</td><td class="mono" style="word-break:break-all">${esc(s.Endpoint)}</td>
+  <td>${s.attrs.PendingConfirmation === 'false' ? '<span style="color:var(--ok)">● Confirmed</span>' : '<span style="color:#b7791f">● Pending confirmation</span>'}</td>
+  <td>${s.attrs.RawMessageDelivery === 'true' ? 'Yes' : 'No'}</td><td>${s.attrs.FilterPolicy ? `<a data-f="${i}">View</a>` : '–'}</td>
+  <td>${s.attrs.SubscriptionArn ? `<a data-e="${i}">Edit</a> · <a data-u="${i}">Delete</a>` : ''}</td></tr>`).join('')}</tbody></table>
+  ${subs.length ? '' : '<div class="empty"><b>No subscriptions</b>Create a subscription to deliver this topic’s messages.</div>'}`;
+
+function wireSubTable(root, subs, after) {
+  root.querySelectorAll('[data-f]').forEach((a) => (a.onclick = () => infoModal('Filter policy', `<pre class="body">${esc(JSON.stringify(JSON.parse(subs[a.dataset.f].attrs.FilterPolicy), null, 2))}</pre><div class="hint" style="color:var(--muted);margin-top:6px">Scope: ${esc(subs[a.dataset.f].attrs.FilterPolicyScope)}</div>`)));
+  root.querySelectorAll('[data-u]').forEach((a) => (a.onclick = async () => {
+    if (!confirm('Delete this subscription?')) return;
+    try { await sns('Unsubscribe', { SubscriptionArn: subs[a.dataset.u].attrs.SubscriptionArn }); setFlash('Subscription deleted.'); } catch (e) { setFlash(e.message, true); }
+    after();
+  }));
+  root.querySelectorAll('[data-e]').forEach((a) => (a.onclick = () => editSubModal(subs[a.dataset.e], after)));
+}
+
+function infoModal(title, html) {
+  $('#modal').innerHTML = `<div class="modal-bg"><div class="modal"><div class="hd"><span>${title}</span><a id="x">✕</a></div><div class="bd">${html}</div><div class="ft"><button class="btn" id="c">Close</button></div></div></div>`;
+  $('#x').onclick = $('#c').onclick = () => ($('#modal').innerHTML = '');
+}
+
+function editSubModal(s, after) {
+  const arn = s.attrs.SubscriptionArn;
+  $('#modal').innerHTML = `<div class="modal-bg"><div class="modal"><div class="hd"><span>Edit subscription</span><a id="x">✕</a></div><div class="bd"><div id="e"></div>
+    <div class="field"><label>Raw message delivery</label><select id="raw"><option value="false">Disabled (JSON envelope)</option><option value="true" ${s.attrs.RawMessageDelivery === 'true' ? 'selected' : ''}>Enabled (message body only)</option></select></div>
+    <div class="field"><label>Filter policy scope</label><select id="scope"><option>MessageAttributes</option><option ${s.attrs.FilterPolicyScope === 'MessageBody' ? 'selected' : ''}>MessageBody</option></select></div>
+    <div class="field"><label>Filter policy <span style="font-weight:400;color:var(--muted)">– JSON, empty to remove</span></label><textarea id="fp">${esc(s.attrs.FilterPolicy ? JSON.stringify(JSON.parse(s.attrs.FilterPolicy), null, 2) : '')}</textarea></div></div>
+    <div class="ft"><button class="btn" id="c">Cancel</button><button class="btn primary" id="sv">Save changes</button></div></div></div>`;
+  $('#x').onclick = $('#c').onclick = () => ($('#modal').innerHTML = '');
+  $('#sv').onclick = async () => {
+    try {
+      await sns('SetSubscriptionAttributes', { SubscriptionArn: arn, AttributeName: 'RawMessageDelivery', AttributeValue: $('#raw').value });
+      await sns('SetSubscriptionAttributes', { SubscriptionArn: arn, AttributeName: 'FilterPolicyScope', AttributeValue: $('#scope').value });
+      await sns('SetSubscriptionAttributes', { SubscriptionArn: arn, AttributeName: 'FilterPolicy', AttributeValue: $('#fp').value.trim() });
+      $('#modal').innerHTML = ''; setFlash('Subscription updated.'); after();
+    } catch (e) { $('#e').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+}
+
+async function snsSubsTab(root, t) {
+  const subs = await subsFor(t.arn);
+  root.innerHTML = `<div class="card"><div class="hd"><h2>Subscriptions <span class="cnt">(${subs.length})</span></h2><button class="btn primary" id="newsub">Create subscription</button></div>${subTable(subs, false)}</div>`;
+  wireSubTable(root, subs, () => snsTopicView(t.name));
+  $('#newsub').onclick = () => createSubModal(t, subs);
+}
+
+async function createSubModal(t, existing) {
+  const qs = (await listAll()).filter((q) => !!q.a.FifoQueue === !!t.a.FifoTopic);
+  const protos = t.a.FifoTopic ? ['sqs'] : ['sqs', 'http', 'https', 'email', 'email-json', 'sms'];
+  $('#modal').innerHTML = `<div class="modal-bg"><div class="modal"><div class="hd"><span>Create subscription</span><a id="x">✕</a></div><div class="bd"><div id="e"></div>
+    <div class="field"><label>Topic ARN</label><input type="text" value="${esc(t.arn)}" disabled></div>
+    <div class="field"><label>Protocol</label><select id="proto">${protos.map((p) => `<option value="${p}">${PROTO_LABEL[p]}</option>`).join('')}</select></div>
+    <div class="field" id="ep-q"><label>Endpoint</label><select id="epq">${qs.map((q) => `<option value="${esc(q.a.QueueArn)}">${esc(q.a.QueueArn)}</option>`).join('') || '<option value="">No eligible queues – create one in SQS first</option>'}</select></div>
+    <div class="field" id="ep-t" style="display:none"><label id="ep-l">Endpoint</label><input type="text" id="ept"><div class="hint" id="ep-h" style="color:var(--muted)"></div></div>
+    <div class="field" id="rawf"><label>Raw message delivery</label><select id="raw"><option value="false">Disabled (JSON envelope)</option><option value="true">Enabled (message body only)</option></select></div>
+    <div class="field"><label>Filter policy scope</label><select id="scope"><option>MessageAttributes</option><option>MessageBody</option></select></div>
+    <div class="field"><label>Filter policy <span style="font-weight:400;color:var(--muted)">– optional JSON</span></label><textarea id="fp" placeholder='{"tier": ["gold", {"prefix": "plat"}], "amount": [{"numeric": [">", 100]}]}'></textarea></div></div>
+    <div class="ft"><button class="btn" id="c">Cancel</button><button class="btn primary" id="sv">Create subscription</button></div></div></div>`;
+  $('#x').onclick = $('#c').onclick = () => ($('#modal').innerHTML = '');
+  const hints = { http: ['URL', 'http://host.docker.internal:8080/hook — from inside Docker, localhost is the container itself. You get a SubscriptionConfirmation POST; open its SubscribeURL to confirm.'], https: ['URL', 'https://…'], email: ['Email address', 'Not really sent: messages appear in the Delivery log.'], 'email-json': ['Email address', 'Not really sent: the JSON appears in the Delivery log.'], sms: ['Phone number', 'Not really sent: messages appear in the Delivery log. Example: +14155550100'] };
+  $('#proto').onchange = () => {
+    const p = $('#proto').value;
+    $('#ep-q').style.display = p === 'sqs' ? '' : 'none'; $('#ep-t').style.display = p === 'sqs' ? 'none' : '';
+    $('#rawf').style.display = ['sqs', 'http', 'https'].includes(p) ? '' : 'none';
+    if (hints[p]) { $('#ep-l').textContent = hints[p][0]; $('#ep-h').textContent = hints[p][1]; }
+  };
+  $('#sv').onclick = async () => {
+    const p = $('#proto').value, Attributes = {};
+    if ($('#raw').value === 'true' && ['sqs', 'http', 'https'].includes(p)) Attributes.RawMessageDelivery = 'true';
+    if ($('#fp').value.trim()) { Attributes.FilterPolicy = $('#fp').value.trim(); Attributes.FilterPolicyScope = $('#scope').value; }
+    try {
+      const r = await sns('Subscribe', { TopicArn: t.arn, Protocol: p, Endpoint: p === 'sqs' ? $('#epq').value : $('#ept').value.trim(), Attributes });
+      $('#modal').innerHTML = ''; setFlash(r.SubscriptionArn === 'pending confirmation' ? 'Subscription created. Pending confirmation: check the Delivery log for the confirmation request.' : 'Subscription created successfully.'); snsTopicView(t.name);
+    } catch (e) { $('#e').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+}
+
+function snsPublishTab(root, t, fifo) {
+  root.innerHTML = `<div class="card"><div class="hd"><h2>Message details</h2></div><div class="bd"><div id="pres"></div>
+    <div class="field"><label>Subject <span style="font-weight:400;color:var(--muted)">– optional</span></label><input type="text" id="subj" maxlength="100"></div>
+    <div class="field"><label>Message body</label><textarea id="msg" placeholder='{"orderId": 42}'></textarea></div>
+    <div class="field"><label>Message structure</label><select id="ms"><option value="">Identical payload for all delivery protocols</option><option value="json">Custom payload for each delivery protocol (JSON with a "default" key)</option></select></div>
+    ${fifo ? `<div class="row"><div class="field"><label>Message group ID <i style="color:var(--err)">*</i></label><input type="text" id="gid" value="default"></div>
+      <div class="field"><label>Message deduplication ID</label><input type="text" id="did" placeholder="optional if content-based"></div></div>` : ''}
+    <div class="field attrs"><label>Message attributes <span style="font-weight:400;color:var(--muted)">– used by subscription filter policies</span></label><div id="attrs"></div><button class="btn sm" id="addattr">Add new attribute</button></div>
+    <div style="text-align:right"><button class="btn primary" id="pub">Publish message</button></div></div></div>`;
+  $('#addattr').onclick = () => {
+    const d = document.createElement('div'); d.className = 'a';
+    d.innerHTML = '<input type="text" placeholder="Name" class="an"><select class="at"><option>String</option><option>Number</option><option>String.Array</option></select><input type="text" placeholder="Value" class="av"><a class="x">Remove</a>';
+    d.querySelector('.x').onclick = () => d.remove(); $('#attrs').appendChild(d);
+  };
+  $('#pub').onclick = async () => {
+    const p = { TopicArn: t.arn, Message: $('#msg').value };
+    if ($('#subj').value) p.Subject = $('#subj').value;
+    if ($('#ms').value) p.MessageStructure = 'json';
+    if (fifo) { p.MessageGroupId = $('#gid').value; if ($('#did').value) p.MessageDeduplicationId = $('#did').value; }
+    const ma = {};
+    document.querySelectorAll('#attrs .a').forEach((d) => { const n = d.querySelector('.an').value.trim(); if (n) ma[n] = { DataType: d.querySelector('.at').value, StringValue: d.querySelector('.av').value }; });
+    if (Object.keys(ma).length) p.MessageAttributes = ma;
+    try { const r = await sns('Publish', p); $('#pres').innerHTML = `<div class="flash">Message published. ID: <span class="mono">${esc(r.MessageId)}</span> – see the Delivery log.</div>`; }
+    catch (e) { $('#pres').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+  };
+}
+
+const statusColor = { delivered: 'var(--ok)', filtered: 'var(--muted)', failed: 'var(--err)' };
+async function snsLogTab(root, t) {
+  const log = (await sns('ListDeliveryLog', { TopicArn: t.arn })).Deliveries;
+  root.innerHTML = `<div class="card"><div class="hd"><h2>Delivery log <span class="cnt">(${log.length})</span></h2><span class="cnt">In-memory, newest first. Email and SMS land here instead of being sent.</span></div>
+    <table><thead><tr><th>Time</th><th>Protocol</th><th>Endpoint</th><th>Status</th><th>Detail</th></tr></thead><tbody>
+    ${log.map((d, i) => `<tr><td>${new Date(d.ts).toLocaleTimeString()}</td><td>${PROTO_LABEL[d.protocol] || esc(d.protocol)}</td><td class="mono" style="word-break:break-all">${esc(d.endpoint)}</td>
+      <td style="color:${statusColor[d.status]}">● ${d.status}</td><td>${d.detail.length > 70 || d.detail.includes('\n') ? `<a data-d="${i}">${esc(d.subject || d.detail.slice(0, 50).replace(/\n/g, ' '))}…</a>` : esc(d.detail)}</td></tr>`).join('')}</tbody></table>
+    ${log.length ? '' : '<div class="empty"><b>No deliveries yet</b>Publish a message to this topic.</div>'}</div>`;
+  root.querySelectorAll('[data-d]').forEach((a) => (a.onclick = () => infoModal('Delivery', `<pre class="body">${esc(log[a.dataset.d].detail)}</pre>`)));
+}
+
+async function snsSubsView() {
+  const subs = await subsFor();
+  $('#app').innerHTML = `<div class="crumb">Amazon SNS<span>›</span>Subscriptions</div>${flashHtml()}
+    <div class="card"><div class="hd"><h2>Subscriptions <span class="cnt">(${subs.length})</span></h2><button class="btn" id="refresh">↻</button></div>${subTable(subs, true)}</div>`;
+  $('#refresh').onclick = route;
+  wireSubTable($('#app'), subs, route);
+}
+
+// ---------- router ----------
+async function route() {
+  clearTimeout(timer);
+  $('#modal').innerHTML = '';
+  const h = location.hash || '#/queues';
+  try {
+    if (h.startsWith('#/sns/')) { await routeSns(h); return; }
+    renderNav('sqs', 'queues');
+    if (h.startsWith('#/create')) { await viewCreate(); }
+    else if (h.startsWith('#/queues/')) { polled = h === state.last ? polled : []; state.last = h; await viewQueue(decodeURIComponent(h.slice(9))); }
+    else await viewList();
+  } catch (e) { $('#app').innerHTML = `<div class="flash err">${esc(e.message)}</div>`; }
+}
+window.addEventListener('hashchange', () => { if (!location.hash.startsWith('#/queues/')) state.last = null; if (!location.hash.startsWith('#/sns/topics/')) state.snsTab = location.hash.startsWith('#/sns/') ? state.snsTab : null; route(); });
+route();
+</script>
+</body>
+</html>

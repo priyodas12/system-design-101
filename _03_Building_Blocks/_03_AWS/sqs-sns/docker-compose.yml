@@ -1,0 +1,20 @@
+name: sd101-sqs-sns
+
+services:
+  app:
+    build: .
+    image: sd101-sqs-sns:local
+    container_name: sd101-sqs-sns
+    ports:
+      - "${SQS_PORT:-9324}:9324"
+    volumes:
+      # /data must be writable by the non-root `node` user; a fresh named volume inherits that from the image.
+      - data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:9324/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  data:

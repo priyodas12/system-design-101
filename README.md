@@ -37,8 +37,10 @@ For deeper study, go through the folders in order:
 
 ## How each note is written
 
-- **Concept notes** (`_02_`, `_03_`): TL;DR → why it matters → how it works → trade-offs →
-  real-world examples → interview questions → further reading.
+- **Concept notes** (`_02_`, `_03_`): TL;DR → overview → side-by-side comparison → for each
+  option: what it is, use when, don't use when, advantages, limitations → worked examples →
+  quick decision points → interview questions. See
+  [API design](_02_Fundamentals/api-design.md) for the reference example.
 - **Case studies** (`_04_`): requirements → capacity estimates → API → data model →
   high-level design → deep dives → scaling → reliability → trade-offs.
 - Diagrams use [Mermaid](https://mermaid.js.org/) inside the markdown, so they render

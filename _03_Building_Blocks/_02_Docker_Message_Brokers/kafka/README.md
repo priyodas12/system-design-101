@@ -2,7 +2,7 @@
 
 Distributed event log: producers append messages to partitioned topics, and consumer groups
 read them in order per partition and can replay them. See
-[message queues](../../message-queues.md).
+[message queues](../../../_02_Fundamentals/message-queues.md).
 
 | | |
 |---|---|

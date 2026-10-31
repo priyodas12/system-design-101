@@ -625,3 +625,4 @@ the DB sees 5,000 QPS; if the hit ratio drops, DB load rises 1:1 with the extra 
 - [Databases](databases.md) and [sharding](sharding.md)
 - [Estimation cheat sheet](../_01_Interview_Playbook/estimation-cheat-sheet.md): latency numbers
 - [Redis lab](../_03_Building_Blocks/_01_Docker_Databases/redis/): run the examples locally
+- [CDN](cdn.md): HTTP caching at the edge

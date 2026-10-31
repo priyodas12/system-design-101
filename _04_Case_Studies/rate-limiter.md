@@ -12,4 +12,4 @@
 
 ## Related
 - [API design](../_02_Fundamentals/api-design.md)
-- [Cache](../_03_Building_Blocks/cache.md)
+- [Cache](../_02_Fundamentals/cache.md)

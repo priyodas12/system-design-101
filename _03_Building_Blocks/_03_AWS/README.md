@@ -1,7 +1,7 @@
 # AWS (local)
 
 Standalone, Docker-run stand-ins for AWS services, so the ideas in
-[message queues](../message-queues.md) can be tried hands-on without an AWS account.
+[message queues](../../_02_Fundamentals/message-queues.md) can be tried hands-on without an AWS account.
 
 | Service | What it is | Ports | Fill in `.env` |
 |---|---|---|---|

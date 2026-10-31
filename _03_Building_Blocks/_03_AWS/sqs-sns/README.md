@@ -2,7 +2,7 @@
 
 Small SQS and SNS clones in **one container with one AWS-console-style web UI**. Node.js,
 **zero dependencies** (built-in `http` only), so the image builds in seconds. See
-[message queues](../../message-queues.md) for the concepts.
+[message queues](../../../_02_Fundamentals/message-queues.md) for the concepts.
 
 | | |
 |---|---|

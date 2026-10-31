@@ -489,3 +489,5 @@ the loss of one node or zone still leaves enough capacity. See [Capacity](#capac
 - [API design](api-design.md): gRPC and WebSocket need Layer 7 awareness
 - [Rate limiting](rate-limiting.md): often done at the LB or gateway
 - Case studies: [URL shortener](../_04_Case_Studies/url-shortener.md), [chat](../_04_Case_Studies/chat-application.md), [news feed](../_04_Case_Studies/news-feed.md)
+- [API gateway](api-gateway.md) and [service discovery](service-discovery.md)
+- [CDN](cdn.md): global edge caching in front of the load balancer

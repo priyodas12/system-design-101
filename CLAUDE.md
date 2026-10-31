@@ -207,9 +207,13 @@ Track progress here; tick items off as notes are written.
 - [x] Consistency models (strong, eventual, causal, read-your-writes)
 - [x] Replication (leader-follower, multi-leader, leaderless, quorums)
 - [x] Sharding / partitioning; consistent hashing
-- [ ] Consensus (Raft / Paxos), leader election
+- [x] DB sharding in practice: partitioning, Vitess/Citus, distributed DBs, resharding (db-sharding.md)
+- [x] Unique ID generation: auto-increment, UUIDv4/v7, Snowflake, ranges (id-generation.md)
+- [x] Service discovery (service-discovery.md)
+- [x] Consensus (Raft / Paxos), leader election (leader-election.md)
 - [x] Distributed transactions (2PC, Saga, outbox)
 - [x] Reliability: idempotency, retries with backoff, timeouts, circuit breakers
+- [x] Resiliency patterns: backpressure, retry budgets, hedging, cells, shuffle sharding, static stability
 - [x] Sync vs async communication
 - [x] API design (REST, GraphQL, SOAP, gRPC, RPC, WebSocket, pagination, sorting, filtering, versioning)
 - [x] Rate limiting algorithms
@@ -219,13 +223,13 @@ Track progress here; tick items off as notes are written.
 **_03 – Building blocks**
 - [x] Load balancer
 - [x] Cache (strategies and eviction)
-- [x] SQL databases and indexing
+- [x] SQL databases and indexing (deep dive: `_02_Fundamentals/db-indexing.md`)
 - [x] NoSQL databases (key-value, document, wide-column, graph)
 - [x] Message queues and event streaming
-- [ ] CDN
-- [ ] API gateway
-- [ ] Object storage
-- [ ] Search index
+- [x] CDN (`_02_Fundamentals/cdn.md`)
+- [x] API gateway (`_02_Fundamentals/api-gateway.md`)
+- [x] Object storage (`_02_Fundamentals/object-storage.md`)
+- [x] Search index (`_02_Fundamentals/search-index.md`)
 
 **_04 – Case studies**
 - [ ] URL shortener (blueprint written, needs full write-up)

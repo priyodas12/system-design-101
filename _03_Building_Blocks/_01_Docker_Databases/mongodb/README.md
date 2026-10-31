@@ -1,7 +1,7 @@
 # MongoDB
 
 Document (NoSQL) database with flexible JSON-like documents, good for catalogs and profiles.
-See [databases](../../databases.md#nosql-types).
+See [databases](../../../_02_Fundamentals/databases.md#nosql-types).
 
 | | |
 |---|---|

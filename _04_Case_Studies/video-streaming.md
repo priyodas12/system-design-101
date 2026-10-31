@@ -17,5 +17,5 @@ flowchart LR
 ```
 
 ## Related
-- [Message queues](../_03_Building_Blocks/message-queues.md)
-- [Cache](../_03_Building_Blocks/cache.md): CDN
+- [Message queues](../_02_Fundamentals/message-queues.md)
+- [Cache](../_02_Fundamentals/cache.md): CDN

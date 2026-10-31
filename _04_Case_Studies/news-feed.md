@@ -23,5 +23,5 @@ flowchart LR
 
 ## Related
 - [Trade-offs](../_01_Interview_Playbook/trade-offs.md): push vs pull
-- [Message queues](../_03_Building_Blocks/message-queues.md)
-- [Cache](../_03_Building_Blocks/cache.md)
+- [Message queues](../_02_Fundamentals/message-queues.md)
+- [Cache](../_02_Fundamentals/cache.md)

@@ -367,11 +367,11 @@ flowchart TD
 - **[Distributed key-value store](../_04_Case_Studies/distributed-key-value-store.md):** ring with
   vnodes for partitioning, next 3 distinct nodes as replicas, quorum reads and writes (see
   [CAP and consistency](cap-and-consistency.md#tuning-consistency-in-practice)), gossip for membership.
-- **Distributed cache** (see [cache](../_03_Building_Blocks/cache.md)): ring with vnodes or
+- **Distributed cache** (see [cache](cache.md)): ring with vnodes or
   rendezvous in the client, so adding a cache server only empties ~1/N of the cache.
 - **[Chat application](../_04_Case_Studies/chat-application.md):** hash `conversation_id` to pick
   the storage partition, and a presence store to find which WebSocket server holds a user.
-- **[Load balancer](../_03_Building_Blocks/load-balancer.md):** Maglev or ring hash for sticky
+- **[Load balancer](load-balancer.md):** Maglev or ring hash for sticky
   sessions; bounded loads when one server must not take a burst.
 
 ## Interview questions
@@ -412,7 +412,7 @@ once it finishes. All other keys stay put.
 - [Sharding](sharding.md): hash, range and directory-based partitioning
 - [Replication](replication.md): quorums and replica placement
 - [CAP and consistency](cap-and-consistency.md)
-- [Load balancer](../_03_Building_Blocks/load-balancer.md)
-- [Cache](../_03_Building_Blocks/cache.md)
+- [Load balancer](load-balancer.md)
+- [Cache](cache.md)
 - [Distributed key-value store](../_04_Case_Studies/distributed-key-value-store.md)
 - [Experiment: compare hashing strategies](../_06_Experiments/consistent-hashing/README.md)

@@ -159,7 +159,7 @@ Rules:
 | Cross-shard joins | Co-locate related tables by the same key; denormalize; join in the application |
 | Cross-shard transactions | Avoid by design; otherwise sagas or 2PC (see [distributed transactions](distributed-transactions.md)) |
 | Hot shards / celebrity users | Split the key (`user_id#bucket`), cache hot data, give big tenants their own shard |
-| Global unique IDs | UUIDs, or Snowflake-style IDs (timestamp + machine ID + sequence) instead of auto-increment |
+| Global unique IDs | UUIDs, or Snowflake-style IDs (timestamp + machine ID + sequence) instead of auto-increment (see [ID generation](id-generation.md)) |
 | Rebalancing | Fixed partitions or consistent hashing; move data in the background, then switch routing |
 | Secondary indexes | Local index per shard (queries scatter) or a global index (writes become distributed) |
 
@@ -275,4 +275,6 @@ that are unique, roughly time-ordered and 64-bit.
 - [Replication](replication.md): each shard is usually replicated
 - [Distributed transactions](distributed-transactions.md): when a write spans shards
 - [Scalability](scalability.md): the scaling path before sharding
-- [Databases](../_03_Building_Blocks/databases.md)
+- [Databases](databases.md)
+- [DB sharding in practice](db-sharding.md): partitioning, Vitess/Citus, native distributed DBs, resharding
+- [ID generation](id-generation.md): Snowflake, UUIDv7 and range allocation

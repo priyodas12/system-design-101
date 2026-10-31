@@ -1,7 +1,7 @@
 # Docker Message Brokers
 
 Message brokers that run locally with Docker, so the ideas in
-[message queues](../message-queues.md) can be tried hands-on.
+[message queues](../../_02_Fundamentals/message-queues.md) can be tried hands-on.
 
 | Broker | Model | Image | Ports | Fill in `.env` |
 |---|---|---|---|---|

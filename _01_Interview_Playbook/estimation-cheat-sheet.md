@@ -43,7 +43,7 @@ Approximate: know the order, not exact values.
 | Round trip across continents | 150 ms |
 
 **Key takeaway:** memory is ~1000× faster than SSD, and a round trip across the world is
-very slow. This is why [caching](../_03_Building_Blocks/cache.md) and CDNs matter.
+very slow. This is why [caching](../_02_Fundamentals/cache.md) and CDNs matter.
 
 ## Availability ("the nines")
 | Availability | Downtime/year |

@@ -338,7 +338,7 @@ deduplicate by event ID (the inbox pattern).
 
 ## Related
 - [Idempotency and delivery guarantees](idempotency-and-delivery-guarantees.md)
-- [Message queues](../_03_Building_Blocks/message-queues.md)
+- [Message queues](message-queues.md)
 - [CAP and consistency](cap-and-consistency.md)
 - [Sharding](sharding.md): avoiding cross-shard transactions
 - [Payment system](../_04_Case_Studies/payment-system.md)

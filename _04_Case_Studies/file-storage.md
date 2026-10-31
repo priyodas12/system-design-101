@@ -10,5 +10,5 @@
 | Deep dive | Deduplication by chunk hash; conflict handling. |
 
 ## Related
-- [Databases](../_03_Building_Blocks/databases.md)
+- [Databases](../_02_Fundamentals/databases.md)
 - [Notification system](notification-system.md)

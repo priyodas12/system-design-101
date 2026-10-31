@@ -262,5 +262,6 @@ and anti-entropy compares Merkle trees in the background to fix the rest.
 - [Sharding](sharding.md): scaling writes
 - [Consistent hashing](consistent-hashing.md): placing replicas on a ring
 - [Reliability](reliability.md): failover, RPO and RTO
-- [Databases](../_03_Building_Blocks/databases.md)
+- [Databases](databases.md)
 - [PostgreSQL Docker setup](../_03_Building_Blocks/_01_Docker_Databases/postgresql/README.md)
+- [Leader election and consensus](leader-election.md): Raft, Paxos, leases and fencing tokens

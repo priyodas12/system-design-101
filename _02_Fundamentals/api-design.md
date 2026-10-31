@@ -8,7 +8,7 @@
 - **SOAP** only when an enterprise partner or a standard requires it.
 - **Plain RPC** (JSON-RPC, Thrift) for simple internal "call this function" APIs.
 - If the caller doesn't need an answer right now, skip the API call: use a
-  [message queue](../_03_Building_Blocks/message-queues.md).
+  [message queue](message-queues.md).
 
 ## Ways services communicate
 
@@ -17,7 +17,7 @@
 | Request / response (sync) | Client asks, server answers | REST, SOAP, gRPC (unary), RPC, GraphQL |
 | Streaming | Either side keeps sending over an open connection | gRPC streaming, WebSocket, SSE |
 | Server push | Server notifies the client when something happens | WebSocket, SSE, webhooks, long polling |
-| Async messaging | Producer drops a message; a consumer handles it later | Kafka, RabbitMQ, SQS (see [message queues](../_03_Building_Blocks/message-queues.md)) |
+| Async messaging | Producer drops a message; a consumer handles it later | Kafka, RabbitMQ, SQS (see [message queues](message-queues.md)) |
 
 ## Side-by-side comparison
 
@@ -55,7 +55,7 @@ carries everything the server needs (stateless).
 
 **Advantages**
 - Simple, universal, easy to debug with a browser or `curl`.
-- Stateless, so it's easy to scale horizontally behind a [load balancer](../_03_Building_Blocks/load-balancer.md).
+- Stateless, so it's easy to scale horizontally behind a [load balancer](load-balancer.md).
 - Built-in HTTP caching (Cache-Control, ETag) and standard status codes.
 - Huge ecosystem: OpenAPI, API gateways, client generators.
 
@@ -93,7 +93,7 @@ carries everything the server needs (stateless).
 - **Pagination, sorting and filtering:** see [the section below](#pagination-sorting-and-filtering).
 - **Versioning:** `/v1/...` in the path, or a header. Add fields freely; never remove or rename them within a version.
 - **API gateway:** a single entry point for auth, [rate limiting](rate-limiting.md), routing and
-  logging (e.g. AWS API Gateway, Azure APIM = API Management).
+  logging (e.g. AWS API Gateway, Azure APIM = API Management). See [API gateway](api-gateway.md).
 
 ---
 
@@ -532,8 +532,9 @@ Allow-list fields and validate values (no raw SQL), cap the page size, index the
 filter + sort combinations, and send free-text search to a search index.
 
 ## Related
-- [Message queues](../_03_Building_Blocks/message-queues.md): async communication
-- [Load balancer](../_03_Building_Blocks/load-balancer.md): Layer 4 vs Layer 7 (matters for gRPC and WebSocket)
+- [Message queues](message-queues.md): async communication
+- [Load balancer](load-balancer.md): Layer 4 vs Layer 7 (matters for gRPC and WebSocket)
 - [Idempotency](idempotency-and-delivery-guarantees.md)
 - [Rate limiting](rate-limiting.md)
 - [Security](security.md)
+- [API gateway](api-gateway.md): auth, routing and rate limiting at the edge

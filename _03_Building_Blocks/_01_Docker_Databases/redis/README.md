@@ -1,7 +1,7 @@
 # Redis
 
 In-memory key-value store, used as a cache, session store, rate-limit counter and more.
-See [cache](../../cache.md) and [rate limiting](../../../_02_Fundamentals/rate-limiting.md).
+See [cache](../../../_02_Fundamentals/cache.md) and [rate limiting](../../../_02_Fundamentals/rate-limiting.md).
 
 | | |
 |---|---|

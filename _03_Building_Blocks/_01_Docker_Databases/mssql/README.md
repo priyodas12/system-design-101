@@ -1,7 +1,7 @@
 # Microsoft SQL Server
 
 Relational (SQL) database from Microsoft, running the free Developer edition.
-See [databases](../../databases.md).
+See [databases](../../../_02_Fundamentals/databases.md).
 
 | | |
 |---|---|

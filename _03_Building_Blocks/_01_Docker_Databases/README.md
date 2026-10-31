@@ -1,6 +1,6 @@
 # Docker Databases
 
-Databases that run locally with Docker, so the ideas in [databases](../databases.md),
+Databases that run locally with Docker, so the ideas in [databases](../../_02_Fundamentals/databases.md),
 [replication](../../_02_Fundamentals/replication.md) and
 [sharding](../../_02_Fundamentals/sharding.md) can be tried hands-on.
 

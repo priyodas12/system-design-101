@@ -302,5 +302,5 @@ subtract that many tokens from the bucket.
 - [API design](api-design.md): API gateways and status codes
 - [Reliability](reliability.md): load shedding and retries with backoff
 - [Security](security.md): protecting APIs from abuse
-- [Cache](../_03_Building_Blocks/cache.md): Redis
+- [Cache](cache.md): Redis
 - [Redis Docker setup](../_03_Building_Blocks/_01_Docker_Databases/redis/README.md)

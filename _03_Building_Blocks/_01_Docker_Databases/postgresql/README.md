@@ -1,7 +1,7 @@
 # PostgreSQL
 
 Relational (SQL) database with ACID transactions, joins and B-tree indexes.
-See [databases](../../databases.md).
+See [databases](../../../_02_Fundamentals/databases.md).
 
 | | |
 |---|---|

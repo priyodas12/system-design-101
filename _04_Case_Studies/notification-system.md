@@ -17,6 +17,6 @@ flowchart LR
 ```
 
 ## Related
-- [Message queues](../_03_Building_Blocks/message-queues.md)
+- [Message queues](../_02_Fundamentals/message-queues.md)
 - [Idempotency](../_02_Fundamentals/idempotency-and-delivery-guarantees.md)
 - [Rate limiting](../_02_Fundamentals/rate-limiting.md)

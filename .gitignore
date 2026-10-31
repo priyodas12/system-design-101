@@ -112,3 +112,66 @@ pip-log.txt
 
 # Logs
 *.log
+
+# ===== Sensitive data (added by /git-ignore) =====
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+secrets.*
+*.secret
+*.secrets
+credentials.json
+service-account*.json
+.aws/
+.npmrc
+.pypirc
+.netrc
+terraform.tfstate*
+*.tfvars
+application-local.properties
+application-local.yml
+
+# ===== IDE / editor (added by /git-ignore) =====
+nbproject/
+*.sublime-project
+*.sublime-workspace
+
+# ===== OS (added by /git-ignore) =====
+desktop.ini
+
+# ===== Logs / temp (added by /git-ignore) =====
+logs/
+tmp/
+temp/
+*.tmp
+*.bak
+
+# ===== Python (added by /git-ignore) =====
+ENV/
+pip-wheel-metadata/
+
+# ===== Java / Maven / Gradle (added by /git-ignore) =====
+dependency-reduced-pom.xml
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+release.properties
+
+# ===== JavaScript / TypeScript (added by /git-ignore) =====
+.pnpm-store/
+.yarn/unplugged/
+.angular/
+
+# ===== Rust (added by /git-ignore) =====
+/target/
+debug/

@@ -404,6 +404,6 @@ owner per item. Serve stock *display* from eventually consistent replicas or cac
 - [Replication](replication.md): quorums, leader-follower, replication lag
 - [Sharding](sharding.md): scaling CP systems
 - [Distributed transactions](distributed-transactions.md): consistency across services
-- [Databases](../_03_Building_Blocks/databases.md): ACID vs BASE, SQL vs NoSQL
+- [Databases](databases.md): ACID vs BASE, SQL vs NoSQL
 - [Trade-offs](../_01_Interview_Playbook/trade-offs.md)
 - [Cassandra Docker setup](../_03_Building_Blocks/_01_Docker_Databases/cassandra/README.md)

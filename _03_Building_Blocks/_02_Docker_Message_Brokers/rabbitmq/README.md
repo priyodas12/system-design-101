@@ -1,7 +1,7 @@
 # RabbitMQ
 
 Message broker: producers publish to exchanges, which route messages into queues, and each
-message in a queue goes to one consumer. See [message queues](../../message-queues.md).
+message in a queue goes to one consumer. See [message queues](../../../_02_Fundamentals/message-queues.md).
 
 | | |
 |---|---|

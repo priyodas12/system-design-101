@@ -173,7 +173,7 @@ every other request needs.
 - A non-critical dependency is down.
 
 **Don't use when**
-- Dropping the work loses data you can't recover: queue it instead (see [message queues](../_03_Building_Blocks/message-queues.md)).
+- Dropping the work loses data you can't recover: queue it instead (see [message queues](message-queues.md)).
 
 **Advantages**
 - Keeps the core experience up during overload or partial outages.
@@ -339,3 +339,4 @@ spent, prioritise reliability.
 - [Replication](replication.md): failover and split brain
 - [Scalability](scalability.md): autoscaling and redundancy
 - [Estimation cheat sheet](../_01_Interview_Playbook/estimation-cheat-sheet.md#availability-the-nines): availability math
+- [Resiliency patterns](resiliency.md): backpressure, retry budgets, hedging, cells, shuffle sharding, static stability

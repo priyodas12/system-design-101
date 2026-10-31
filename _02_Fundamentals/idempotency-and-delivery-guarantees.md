@@ -80,7 +80,7 @@ arrive more than once.
 - **Duplicates:** every consumer must deduplicate or be naturally idempotent.
 - **Ordering can break:** a retried message can arrive after a later one.
 - **Poison messages:** a message that always fails is retried forever; send it to a DLQ (Dead
-  Letter Queue) after N attempts (see [message queues](../_03_Building_Blocks/message-queues.md)).
+  Letter Queue) after N attempts (see [message queues](message-queues.md)).
 
 ---
 
@@ -267,7 +267,7 @@ At least as long as clients or brokers might retry: usually hours to days (Strip
 Expire them to bound storage.
 
 ## Related
-- [Message queues](../_03_Building_Blocks/message-queues.md)
+- [Message queues](message-queues.md)
 - [Distributed transactions](distributed-transactions.md): outbox and sagas
 - [Reliability](reliability.md): retries with backoff
 - [API design](api-design.md)

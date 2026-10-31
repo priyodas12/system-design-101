@@ -1,7 +1,7 @@
 # MySQL
 
 Relational (SQL) database using the InnoDB engine, with ACID transactions and B-tree indexes.
-See [databases](../../databases.md).
+See [databases](../../../_02_Fundamentals/databases.md).
 
 | | |
 |---|---|

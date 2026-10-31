@@ -39,4 +39,4 @@ which is read by one consumer in order.
 ## Related
 - [Distributed transactions](../_02_Fundamentals/distributed-transactions.md): outbox pattern
 - [Notification system](../_04_Case_Studies/notification-system.md)
-- [Run Kafka and RabbitMQ locally](_02_Docker_Message_Brokers/)
+- [Run Kafka and RabbitMQ locally](../_03_Building_Blocks/_02_Docker_Message_Brokers/)

@@ -270,6 +270,6 @@ Everything else is a dashboard or a ticket.
 ## Related
 - [Reliability](reliability.md): SLIs, SLOs and error budgets
 - [Distributed transactions](distributed-transactions.md): tracing sagas
-- [Message queues](../_03_Building_Blocks/message-queues.md): propagating context through queues
+- [Message queues](message-queues.md): propagating context through queues
 - [Security](security.md): what not to log
 - [Scalability](scalability.md): latency vs throughput

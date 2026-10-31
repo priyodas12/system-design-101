@@ -12,4 +12,4 @@
 ## Related
 - [Consistent hashing](../_02_Fundamentals/consistent-hashing.md)
 - [Replication](../_02_Fundamentals/replication.md): quorums
-- [Cache](../_03_Building_Blocks/cache.md): eviction policies
+- [Cache](../_02_Fundamentals/cache.md): eviction policies

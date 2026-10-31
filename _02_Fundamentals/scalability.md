@@ -9,16 +9,16 @@
 - **Scale the data tier separately:** cache → read replicas → sharding, in that order.
 - **Latency vs throughput:** scaling out raises throughput; it doesn't make a single request faster.
 - If load is bursty and work can wait, **don't scale for the peak**: put a
-  [queue](../_03_Building_Blocks/message-queues.md) in front and process at a steady rate.
+  [queue](message-queues.md) in front and process at a steady rate.
 
 ## The landscape
 
 | Lever | What changes | Typical tools |
 |-------|--------------|---------------|
 | Vertical scaling | Bigger CPU, RAM, disk on one machine | Resize a VM or database instance |
-| Horizontal scaling | More machines behind a [load balancer](../_03_Building_Blocks/load-balancer.md) | Kubernetes Deployments, VM scale sets, AWS Auto Scaling groups |
+| Horizontal scaling | More machines behind a [load balancer](load-balancer.md) | Kubernetes Deployments, VM scale sets, AWS Auto Scaling groups |
 | Auto-scaling | Number of machines over time | Kubernetes HPA, AWS/Azure/GCP autoscalers, KEDA |
-| Offloading work | Less work per request | [Cache](../_03_Building_Blocks/cache.md), CDN, async [queues](../_03_Building_Blocks/message-queues.md) |
+| Offloading work | Less work per request | [Cache](cache.md), CDN, async [queues](message-queues.md) |
 | Scaling data | Where data lives and who serves it | [Replication](replication.md), [sharding](sharding.md) |
 
 ## Side-by-side comparison
@@ -177,9 +177,9 @@ connection limit and use a connection pooler (e.g. PgBouncer).
 | 1 | One server: app + database | Nothing yet; simplest start |
 | 2 | Move the database to its own machine; scale it **up** | App and DB stop competing for resources |
 | 3 | Add a load balancer and 2+ **stateless** app servers | Redundancy; more app capacity |
-| 4 | Add a [cache](../_03_Building_Blocks/cache.md) (Redis) and a CDN for static files | Cuts most read load and latency |
+| 4 | Add a [cache](cache.md) (Redis) and a CDN for static files | Cuts most read load and latency |
 | 5 | Add database [read replicas](replication.md) | Scales reads |
-| 6 | Move slow work to [queues](../_03_Building_Blocks/message-queues.md) and workers | Faster responses; absorbs spikes |
+| 6 | Move slow work to [queues](message-queues.md) and workers | Faster responses; absorbs spikes |
 | 7 | **Auto-scale** app and worker tiers | Handles daily patterns and spikes |
 | 8 | [Shard](sharding.md) the database, or split it by service | Scales writes and storage |
 | 9 | Multiple regions | Lower global latency; survives a region failure |
@@ -251,8 +251,8 @@ They pin users to one server, so load spreads unevenly, scaling in drops session
 failure logs users out. Store sessions in a shared store instead.
 
 ## Related
-- [Load balancer](../_03_Building_Blocks/load-balancer.md)
-- [Cache](../_03_Building_Blocks/cache.md)
+- [Load balancer](load-balancer.md)
+- [Cache](cache.md)
 - [Replication](replication.md) and [sharding](sharding.md): scaling the data tier
 - [Reliability](reliability.md): redundancy, health checks
 - [Estimation cheat sheet](../_01_Interview_Playbook/estimation-cheat-sheet.md): QPS and capacity math

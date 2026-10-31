@@ -327,6 +327,8 @@ ORDER BY mutuals DESC LIMIT 10;
 
 ## Indexing
 
+The essentials are below; [DB indexing](db-indexing.md) covers every index type, ESR column order and tested plans in depth.
+
 - An index makes reads fast (like a book index) but makes writes slower and uses extra storage.
 - **B-tree index:** good for range queries. The default in most SQL DBs.
 - **Hash index:** exact match only.
@@ -523,3 +525,5 @@ using Serializable plus retries only where needed.
 - [Message queues](message-queues.md): event-driven sync between stores
 - [Case studies](../_04_Case_Studies/): [URL shortener](../_04_Case_Studies/url-shortener.md), [chat](../_04_Case_Studies/chat-application.md), [payments](../_04_Case_Studies/payment-system.md)
 - Docker labs: [PostgreSQL](../_03_Building_Blocks/_01_Docker_Databases/postgresql/), [MySQL](../_03_Building_Blocks/_01_Docker_Databases/mysql/), [SQL Server](../_03_Building_Blocks/_01_Docker_Databases/mssql/), [MongoDB](../_03_Building_Blocks/_01_Docker_Databases/mongodb/), [Redis](../_03_Building_Blocks/_01_Docker_Databases/redis/), [Cassandra](../_03_Building_Blocks/_01_Docker_Databases/cassandra/)
+- [DB indexing](db-indexing.md): B-tree, LSM, GIN, BRIN, composite and covering indexes in depth
+- [DB sharding](db-sharding.md) and [search index](search-index.md)

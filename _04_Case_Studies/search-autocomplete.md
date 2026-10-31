@@ -9,5 +9,5 @@
 | Serving | Cache results per prefix; CDN/browser cache for the top prefixes. |
 
 ## Related
-- [Cache](../_03_Building_Blocks/cache.md)
+- [Cache](../_02_Fundamentals/cache.md)
 - [Trade-offs](../_01_Interview_Playbook/trade-offs.md): batch vs stream

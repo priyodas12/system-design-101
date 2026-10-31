@@ -1,7 +1,7 @@
 # Apache Cassandra
 
 Wide-column (NoSQL) database built for huge write volume, with leaderless replication and tunable quorums.
-See [databases](../../databases.md#nosql-types) and [replication](../../../_02_Fundamentals/replication.md).
+See [databases](../../../_02_Fundamentals/databases.md#nosql-types) and [replication](../../../_02_Fundamentals/replication.md).
 
 | | |
 |---|---|

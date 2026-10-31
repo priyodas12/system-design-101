@@ -20,5 +20,5 @@ flowchart LR
 ```
 
 ## Related
-- [Cache](../_03_Building_Blocks/cache.md)
-- [Databases](../_03_Building_Blocks/databases.md)
+- [Cache](../_02_Fundamentals/cache.md)
+- [Databases](../_02_Fundamentals/databases.md)
